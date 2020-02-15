@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Paps.StateMachines.Unity
+namespace Paps.PlainStateMachine_ToolsForUnity
 {
     public class PlainStateMachineBuilder : ScriptableObject
     {

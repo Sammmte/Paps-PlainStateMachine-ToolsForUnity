@@ -2,7 +2,7 @@
 using UnityEditor;
 using System.Collections.Generic;
 
-namespace Paps.StateMachines.Unity.Editor
+namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
     public class PlainStateMachineBuilderEditorWindow : EditorWindow
     {
@@ -20,8 +20,6 @@ namespace Paps.StateMachines.Unity.Editor
 
         void Awake()
         {
-            Debug.Log("Awake");
-
             titleContent = new GUIContent("Plain State Machine Builder Window");
             
             _nodes = new List<StateNode>();
@@ -94,7 +92,7 @@ namespace Paps.StateMachines.Unity.Editor
 
         private void OnClickAddNode(Vector2 mousePosition)
         {
-            _nodes.Add(StateNodeFactory.Create(mousePosition));
+            _nodes.Add(new StateNode(mousePosition));
         }
 
         private void DrawGrid(float gridSpacing, float gridOpacity, Color gridColor)

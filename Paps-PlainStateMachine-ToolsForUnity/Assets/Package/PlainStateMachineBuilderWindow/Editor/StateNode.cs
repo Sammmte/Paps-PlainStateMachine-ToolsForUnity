@@ -1,11 +1,15 @@
 ﻿using System;
 using UnityEditor;
 using UnityEngine;
+using Paps.StateMachines;
 
-namespace Paps.StateMachines.Unity.Editor
+namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
     public class StateNode
     {
+        private const float Width = 200;
+        private const float Height = 100;
+
         private Rect _nodeRect;
         private GUIStyle _style;
 
@@ -16,15 +20,21 @@ namespace Paps.StateMachines.Unity.Editor
 
         public IState StateObject => _stateAssetField.StateAsset as IState;
 
-        public StateNode(Vector2 position, float width, float height, GUIStyle nodeStyle, ScriptableObject stateAsset)
+        private static readonly Texture2D _asNormal = Resources.Load<Texture2D>("Paps/PlainStateMachine-ToolsForUnity/Textures/node_normal");
+        private static readonly Texture2D _asInitial = Resources.Load<Texture2D>("Paps/PlainStateMachine-ToolsForUnity/Textures/node_initial");
+
+        public StateNode(Vector2 position, ScriptableObject stateAsset)
         {
-            _nodeRect = new Rect(position.x, position.y, width, height);
-            _style = nodeStyle;
+            _nodeRect = new Rect(position.x, position.y, Width, Height);
+
+            _style = new GUIStyle();
 
             _stateAssetField = new StateAssetField(stateAsset);
+
+            AsNormal();
         }
 
-        public StateNode(Vector2 position, float width, float height, GUIStyle nodeStyle) : this(position, width, height, nodeStyle, null)
+        public StateNode(Vector2 position) : this(position, null)
         {
 
         }
@@ -101,6 +111,16 @@ namespace Paps.StateMachines.Unity.Editor
 
             return false;
         }
+
+        public void AsNormal()
+        {
+            _style.normal.background = _asNormal;
+        }
+
+        public void AsInitial()
+        {
+            _style.normal.background = _asInitial;
+        }
     }
 
     public class StateAssetField
@@ -120,11 +140,20 @@ namespace Paps.StateMachines.Unity.Editor
         {
             ShowLabel(ref containerRect, containerStyle);
 
+            EditorGUI.BeginChangeCheck();
+
             var preValidatedStateAsset = (ScriptableObject)EditorGUI.ObjectField(GetRect(ref containerRect, containerStyle), StateAsset, _scriptableObjectType, false);
 
-            if (preValidatedStateAsset is IState)
+            if (EditorGUI.EndChangeCheck())
             {
-                StateAsset = preValidatedStateAsset;
+                if (preValidatedStateAsset is IState)
+                {
+                    StateAsset = preValidatedStateAsset;
+                }
+                else
+                {
+                    Debug.LogWarning("Scriptable object does not implements IState interface");
+                }
             }
         }
 
