@@ -8,8 +8,8 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
     {
         private List<StateNode> _nodes;
 
-        private Vector2 _offset;
-        private Vector2 _drag;
+        private BackgroundGridDrawer _gridDrawer;
+        private PlainStateMachineBuilderSettingsDrawer _plainStateMachineBuilderSettingsDrawer;
 
         [MenuItem("Paps/Plain State Machine Builder")]
         private static void OpenWindow()
@@ -23,13 +23,16 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             titleContent = new GUIContent("Plain State Machine Builder Window");
             
             _nodes = new List<StateNode>();
+
+            _gridDrawer = new BackgroundGridDrawer();
+            _plainStateMachineBuilderSettingsDrawer = new PlainStateMachineBuilderSettingsDrawer();
         }
 
         private void OnGUI()
         {
             DrawBackground();
-
             DrawNodes();
+            DrawBuilderSettings();
 
             ProcessNodeEvents(Event.current);
             ProcessEvents(Event.current);
@@ -39,8 +42,12 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private void DrawBackground()
         {
-            DrawGrid(20, 0.2f, Color.gray);
-            DrawGrid(100, 0.4f, Color.gray);
+            _gridDrawer.Draw(position);
+        }
+
+        private void DrawBuilderSettings()
+        {
+            _plainStateMachineBuilderSettingsDrawer.Draw(position);
         }
 
         private void DrawNodes()
@@ -93,31 +100,6 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         private void OnClickAddNode(Vector2 mousePosition)
         {
             _nodes.Add(new StateNode(mousePosition));
-        }
-
-        private void DrawGrid(float gridSpacing, float gridOpacity, Color gridColor)
-        {
-            int widthDivs = Mathf.CeilToInt(position.width / gridSpacing);
-            int heightDivs = Mathf.CeilToInt(position.height / gridSpacing);
-
-            Handles.BeginGUI();
-            Handles.color = new Color(gridColor.r, gridColor.g, gridColor.b, gridOpacity);
-
-            _offset += _drag * 0.5f;
-            Vector3 newOffset = new Vector3(_offset.x % gridSpacing, _offset.y % gridSpacing, 0);
-
-            for (int i = 0; i < widthDivs; i++)
-            {
-                Handles.DrawLine(new Vector3(gridSpacing * i, -gridSpacing, 0) + newOffset, new Vector3(gridSpacing * i, position.height, 0f) + newOffset);
-            }
-
-            for (int j = 0; j < heightDivs; j++)
-            {
-                Handles.DrawLine(new Vector3(-gridSpacing, gridSpacing * j, 0) + newOffset, new Vector3(position.width, gridSpacing * j, 0f) + newOffset);
-            }
-
-            Handles.color = Color.white;
-            Handles.EndGUI();
         }
     }
 }
