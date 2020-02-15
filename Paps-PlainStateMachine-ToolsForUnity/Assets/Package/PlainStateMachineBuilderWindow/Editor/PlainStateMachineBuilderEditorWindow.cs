@@ -29,8 +29,7 @@ namespace Paps.StateMachines.Unity.Editor
 
         private void OnGUI()
         {
-            DrawGrid(20, 0.2f, Color.gray);
-            DrawGrid(100, 0.4f, Color.gray);
+            DrawBackground();
 
             DrawNodes();
 
@@ -38,6 +37,12 @@ namespace Paps.StateMachines.Unity.Editor
             ProcessEvents(Event.current);
 
             if (GUI.changed) Repaint();
+        }
+
+        private void DrawBackground()
+        {
+            DrawGrid(20, 0.2f, Color.gray);
+            DrawGrid(100, 0.4f, Color.gray);
         }
 
         private void DrawNodes()

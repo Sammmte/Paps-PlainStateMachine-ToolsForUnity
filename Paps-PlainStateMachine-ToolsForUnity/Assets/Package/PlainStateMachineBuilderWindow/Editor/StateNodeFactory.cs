@@ -18,8 +18,7 @@ namespace Paps.StateMachines.Unity.Editor
         private static void Initialize()
         {
             _nodeStyle = new GUIStyle();
-            _nodeStyle.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node1.png") as Texture2D;
-            _nodeStyle.border = new RectOffset(12, 12, 12, 12);
+            _nodeStyle.normal.background = Resources.Load<Texture2D>("Paps/StateMachine Editor Assets/Textures/node");
 
             _isInitialized = true;
         }
