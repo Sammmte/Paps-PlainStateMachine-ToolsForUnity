@@ -11,6 +11,8 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         private BackgroundGridDrawer _gridDrawer;
         private PlainStateMachineBuilderSettingsDrawer _plainStateMachineBuilderSettingsDrawer;
 
+        private Vector2 _drag;
+
         [MenuItem("Paps/Plain State Machine Builder")]
         private static void OpenWindow()
         {
@@ -66,12 +68,40 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             switch (e.type)
             {
                 case EventType.MouseDown:
+
                     if (e.button == 1)
                     {
                         ProcessContextMenu(e.mousePosition);
                     }
+
+                    break;
+
+                case EventType.MouseDrag:
+
+                    _drag = Vector2.zero;
+
+                    if (e.button == 0)
+                    {
+                        OnDrag(e.delta);
+                    }
+
                     break;
             }
+        }
+
+        private void OnDrag(Vector2 delta)
+        {
+            _drag = delta;
+
+            if (_nodes != null)
+            {
+                for (int i = 0; i < _nodes.Count; i++)
+                {
+                    _nodes[i].Drag(delta);
+                }
+            }
+
+            GUI.changed = true;
         }
 
         private void ProcessNodeEvents(Event e)

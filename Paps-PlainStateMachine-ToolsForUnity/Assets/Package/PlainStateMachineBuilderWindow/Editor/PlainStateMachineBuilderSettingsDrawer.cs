@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEditor;
+using System;
 
 namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
@@ -8,17 +9,25 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         private const float Width = 300, Height = 400, RightPadding = 10, TopPadding = 10;
         private const float StateIdRepresentationFieldLeftPadding = 20, StateIdRepresentationFieldTopPadding = 40, StateIdRepresentationFieldSizeY = 17;
         private const float TitleLeftPadding = 20, TitleTopPadding = 20, TitleSizeY = 17;
+        private const float EnumTypeFieldLeftPadding = 20, EnumTypeFieldTopPadding = 80, EnumTypeFieldSizeY = 17;
+        private const float EnumTypeFieldTitleLeftPadding = 20, EnumTypeFieldTitleTopPadding = 60, EnumTypeFieldTitleSizeY = 17;
 
         public StateIdRepresentation StateIdRepresentation { get; private set; }
+
+        public Type StateIdType { get; private set; }
 
         private static readonly Texture2D _backgroundTexture = Resources.Load<Texture2D>("Paps/PlainStateMachine-ToolsForUnity/Textures/node_normal");
 
         private GUIStyle _style;
 
+        private string _enumTypeFullName = "";
+
         public PlainStateMachineBuilderSettingsDrawer()
         {
             _style = new GUIStyle();
             _style.normal.background = _backgroundTexture;
+
+            SetStateIdTypeByRepresentation();
         }
 
         public void Draw(Rect windowRect)
@@ -30,12 +39,49 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
             DrawBox(ref containerRect);
             DrawTitle(ref containerRect);
+
+            EditorGUI.BeginChangeCheck();
             DrawStateIdRepresentationField(ref containerRect);
+            
+            if(StateIdRepresentation == StateIdRepresentation.Enum)
+            {
+                DrawEnumTypeField(ref containerRect);
+            }
+
+            if(EditorGUI.EndChangeCheck())
+            {
+                SetStateIdTypeByRepresentation();
+            }
+        }
+
+        private void SetStateIdTypeByRepresentation()
+        {
+            if (StateIdRepresentation == StateIdRepresentation.Int)
+                StateIdType = typeof(int);
+            else if (StateIdRepresentation == StateIdRepresentation.Float)
+                StateIdType = typeof(float);
+            else if (StateIdRepresentation == StateIdRepresentation.String)
+                StateIdType = typeof(string);
+            else if (StateIdRepresentation == StateIdRepresentation.Enum)
+            {
+                if (string.IsNullOrEmpty(_enumTypeFullName) == false)
+                {
+                    StateIdType = Type.GetType(_enumTypeFullName);
+                }
+                else
+                {
+                    StateIdType = null;
+                }
+            }
+
+            Debug.Log(StateIdType);
         }
 
         private void DrawStateIdRepresentationField(ref Rect containerRect)
         {
-            StateIdRepresentation = (StateIdRepresentation)EditorGUI.EnumPopup(GetStateIdRepresentationRect(ref containerRect, _style), StateIdRepresentation);
+            StateIdRepresentation = (StateIdRepresentation)EditorGUI.EnumPopup(
+                GetRect(ref containerRect, _style, StateIdRepresentationFieldLeftPadding, 
+                StateIdRepresentationFieldTopPadding, StateIdRepresentationFieldSizeY), StateIdRepresentation);
         }
 
         private void DrawBox(ref Rect containerRect)
@@ -45,21 +91,19 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private void DrawTitle(ref Rect containerRect)
         {
-            GUI.Label(GetTitleRect(ref containerRect, _style), "Builder Settings");
+            GUI.Label(GetRect(ref containerRect, _style, TitleLeftPadding, TitleTopPadding, TitleSizeY), "Builder Settings");
         }
 
-        private Rect GetStateIdRepresentationRect(ref Rect containerRect, GUIStyle containerStyle)
+        private void DrawEnumTypeField(ref Rect containerRect)
         {
-            var position = new Vector2(containerRect.position.x + StateIdRepresentationFieldLeftPadding, containerRect.position.y + containerStyle.border.top + StateIdRepresentationFieldTopPadding);
-            var size = new Vector2(containerRect.size.x - (StateIdRepresentationFieldLeftPadding * 2), StateIdRepresentationFieldSizeY);
-
-            return new Rect(position, size);
+            GUI.Label(GetRect(ref containerRect, _style, EnumTypeFieldTitleLeftPadding, EnumTypeFieldTitleTopPadding, EnumTypeFieldTitleSizeY), "Enum Type Full Name");
+            _enumTypeFullName = EditorGUI.TextField(GetRect(ref containerRect, _style, EnumTypeFieldLeftPadding, EnumTypeFieldTopPadding, EnumTypeFieldSizeY), _enumTypeFullName);
         }
 
-        private Rect GetTitleRect(ref Rect containerRect, GUIStyle containerStyle)
+        private Rect GetRect(ref Rect containerRect, GUIStyle containerStyle, float leftPadding, float topPadding, float sizeY)
         {
-            var position = new Vector2(containerRect.position.x + TitleLeftPadding, containerRect.position.y + containerStyle.border.top + TitleTopPadding);
-            var size = new Vector2(containerRect.size.x - (TitleLeftPadding * 2), TitleSizeY);
+            var position = new Vector2(containerRect.position.x + leftPadding, containerRect.position.y + containerStyle.border.top + topPadding);
+            var size = new Vector2(containerRect.size.x - (leftPadding * 2), sizeY);
 
             return new Rect(position, size);
         }
