@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using System;
 
 namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
@@ -32,6 +33,8 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             _builderSettingsDrawer = new PlainStateMachineBuilderSettingsDrawer();
 
             _stateIdValidator = new StateIdValidator();
+
+            _builderSettingsDrawer.OnStateIdTypeChanged += OnStateIdTypeChanged;
         }
 
         private void OnGUI()
@@ -134,6 +137,14 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         private void OnClickAddNode(Vector2 mousePosition)
         {
             _nodes.Add(new StateNode(mousePosition, _stateIdValidator, _builderSettingsDrawer.StateIdType));
+        }
+
+        private void OnStateIdTypeChanged(Type newType)
+        {
+            for(int i = 0; i < _nodes.Count; i++)
+            {
+                _nodes[i].SetNewStateIdType(newType);
+            }
         }
     }
 }

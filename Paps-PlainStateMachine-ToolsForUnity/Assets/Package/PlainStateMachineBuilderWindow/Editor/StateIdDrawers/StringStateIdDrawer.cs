@@ -9,7 +9,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         }
 
-        public override void Draw(Rect rect)
+        public override void Draw()
         {
             
         }

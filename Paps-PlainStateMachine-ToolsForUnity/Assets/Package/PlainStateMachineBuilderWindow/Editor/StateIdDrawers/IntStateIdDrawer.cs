@@ -5,17 +5,15 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
     public class IntStateIdDrawer : StateIdDrawer
     {
-        private const float FieldTopPadding = 17;
-
         public IntStateIdDrawer(IStateIdValidator stateIdValidator, object value) : base(value, stateIdValidator)
         {
 
         }
 
-        public override void Draw(Rect rect)
+        public override void Draw()
         {
-            DrawLabel(ref rect);
-            DrawField(ref rect);
+            DrawLabel();
+            DrawField();
         }
 
         protected override bool IsValidType(object value)
@@ -23,9 +21,9 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             return value.GetType() == typeof(int);
         }
 
-        private void DrawLabel(ref Rect rect)
+        private void DrawLabel()
         {
-            GUI.Label(rect, GetLabel());
+            GUILayout.Label(GetLabel());
         }
 
         private string GetLabel()
@@ -36,16 +34,16 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                 return "State Id";
         }
 
-        private void DrawField(ref Rect rect)
+        private void DrawField()
         {
             EditorGUI.BeginChangeCheck();
 
             string value = StateId != null ? StateId.ToString() : "";
 
             if (StateId == null)
-                value = EditorGUI.TextField(GetFieldRect(ref rect), value);
+                value = EditorGUILayout.TextField(value);
             else
-                value = EditorGUI.TextField(GetFieldRect(ref rect), value);
+                value = EditorGUILayout.TextField(value);
 
             if(EditorGUI.EndChangeCheck())
             {
@@ -57,13 +55,6 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                     StateId = null;
                 }
             }
-        }
-
-        private Rect GetFieldRect(ref Rect rect)
-        {
-            var position = new Vector2(rect.position.x, rect.position.y + FieldTopPadding);
-
-            return new Rect(position, rect.size);
         }
     }
 }

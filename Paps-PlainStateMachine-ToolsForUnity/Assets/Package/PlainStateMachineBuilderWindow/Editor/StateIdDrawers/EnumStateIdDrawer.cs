@@ -12,7 +12,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             _enumType = enumType;
         }
 
-        public override void Draw(Rect rect)
+        public override void Draw()
         {
             
         }

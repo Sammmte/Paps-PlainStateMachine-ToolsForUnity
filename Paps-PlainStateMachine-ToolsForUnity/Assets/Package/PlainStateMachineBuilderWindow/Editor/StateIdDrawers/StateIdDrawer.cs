@@ -19,7 +19,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             }
         }
 
-        public abstract void Draw(Rect rect);
+        public abstract void Draw();
 
         protected abstract bool IsValidType(object value);
     }

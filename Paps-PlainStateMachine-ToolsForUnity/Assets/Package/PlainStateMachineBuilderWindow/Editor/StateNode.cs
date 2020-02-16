@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using Paps.StateMachines;
 using System;
+using UnityEditor;
 
 namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
@@ -9,8 +10,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         private const float Width = 200;
         private const float Height = 150;
 
-        private static readonly float StateIdDrawerLeftPadding = 20, StateIdDrawerTopPadding = 20, StateIdDrawerSizeY = 17;
-        private static readonly float StateAssetFieldLeftPadding = 20, StateAssetFieldTopPadding = StateIdDrawerTopPadding + 50, StateAssetFieldSizeY = 17;
+        private const int ControlPaddingLeft = 20, ControlPaddingRight = 20, ControlPaddingTop = 20, ControlPaddingBottom = 20;
 
         private static readonly Texture2D _asNormal = Resources.Load<Texture2D>("Paps/PlainStateMachine-ToolsForUnity/Textures/node_normal");
         private static readonly Texture2D _asInitial = Resources.Load<Texture2D>("Paps/PlainStateMachine-ToolsForUnity/Textures/node_initial");
@@ -31,7 +31,8 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         public IState StateObject => _stateAssetField.StateAsset as IState;
 
         private Rect _nodeRect;
-        private GUIStyle _style;
+        private GUIStyle _nodeStyle;
+        private GUIStyle _controlAreaStyle;
 
         private StateAssetField _stateAssetField;
         private StateIdDrawer _stateIdDrawer;
@@ -40,12 +41,16 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         public StateNode(Vector2 position, IStateIdValidator stateIdValidator, Type stateIdType = null, ScriptableObject stateAsset = null, object stateId = null)
         {
             _nodeRect = new Rect(position.x, position.y, Width, Height);
-            _style = new GUIStyle();
+            _nodeStyle = new GUIStyle();
+            _controlAreaStyle = new GUIStyle();
+            _controlAreaStyle.padding = new RectOffset(ControlPaddingLeft, ControlPaddingRight, ControlPaddingTop, ControlPaddingBottom);
+
             _stateAssetField = new StateAssetField(stateAsset);
 
             _stateIdValidator = stateIdValidator;
 
-            SetNewStateIdType(stateIdType);
+            if(stateIdType != null)
+                _stateIdDrawer = StateIdDrawerFactory.Create(stateIdType, _stateIdValidator, stateId);
 
             AsNormal();
         }
@@ -55,12 +60,12 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             if (stateIdType == null)
                 _stateIdDrawer = null;
             else
-                _stateIdDrawer = StateIdDrawerFactory.Create(stateIdType, _stateIdValidator, StateId);
+                _stateIdDrawer = StateIdDrawerFactory.Create(stateIdType, _stateIdValidator);
         }
 
         public void ShowNullTypeDrawer()
         {
-
+            EditorGUILayout.HelpBox("The state id type was not provided", MessageType.Warning);
         }
 
         public void Drag(Vector2 delta)
@@ -70,19 +75,22 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         public void Draw()
         {
-            DrawBox();
-            DrawStateIdDrawer();
-            DrawStateAssetField();
+            GUILayout.BeginArea(_nodeRect, _nodeStyle);
+            DrawControls();
+            GUILayout.EndArea();
         }
 
-        private void DrawBox()
+        private void DrawControls()
         {
-            GUI.Box(_nodeRect, string.Empty, _style);
+            EditorGUILayout.BeginVertical(_controlAreaStyle);
+            DrawStateIdDrawer();
+            DrawStateAssetField();
+            EditorGUILayout.EndVertical();
         }
 
         private void DrawStateAssetField()
         {
-            _stateAssetField.Draw(GetRect(ref _nodeRect, _style, StateAssetFieldLeftPadding, StateAssetFieldTopPadding, StateAssetFieldSizeY));
+            _stateAssetField.Draw();
         }
 
         private void DrawStateIdDrawer()
@@ -90,7 +98,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             if(_stateIdDrawer == null)
                 ShowNullTypeDrawer();
             else
-                _stateIdDrawer.Draw(GetRect(ref _nodeRect, _style, StateIdDrawerLeftPadding, StateIdDrawerTopPadding, StateIdDrawerSizeY));
+                _stateIdDrawer.Draw();
         }
 
         public bool ProcessEvents(Event ev)
@@ -157,12 +165,12 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         public void AsNormal()
         {
-            _style.normal.background = _asNormal;
+            _nodeStyle.normal.background = _asNormal;
         }
 
         public void AsInitial()
         {
-            _style.normal.background = _asInitial;
+            _nodeStyle.normal.background = _asInitial;
         }
 
         private Rect GetRect(ref Rect containerRect, GUIStyle containerStyle, float leftPadding, float topPadding, float sizeY)
