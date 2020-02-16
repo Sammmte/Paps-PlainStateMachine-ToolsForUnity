@@ -16,6 +16,8 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         public Type StateIdType { get; private set; }
 
+        public event Action<Type> OnStateIdRepresentationTypeChanged;
+
         private static readonly Texture2D _backgroundTexture = Resources.Load<Texture2D>("Paps/PlainStateMachine-ToolsForUnity/Textures/node_normal");
 
         private GUIStyle _style;
@@ -51,6 +53,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             if(EditorGUI.EndChangeCheck())
             {
                 SetStateIdTypeByRepresentation();
+                OnStateIdRepresentationTypeChanged?.Invoke(StateIdType);
             }
         }
 
@@ -73,8 +76,6 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                     StateIdType = null;
                 }
             }
-
-            Debug.Log(StateIdType);
         }
 
         private void DrawStateIdRepresentationField(ref Rect containerRect)

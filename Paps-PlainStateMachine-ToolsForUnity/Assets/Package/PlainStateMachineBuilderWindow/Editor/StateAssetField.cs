@@ -7,7 +7,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
     public class StateAssetField
     {
-        private const float LeftPadding = 20, FieldTopPadding = 27, FieldSizeY = 17, LabelTopPadding = 10, LabelSizeY = 17;
+        private const float FieldTopPadding = 17;
 
         private static readonly Type _scriptableObjectType = typeof(ScriptableObject);
 
@@ -18,16 +18,16 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             StateAsset = stateAsset;
         }
 
-        public void Expose(ref Rect containerRect, GUIStyle containerStyle)
+        public void Draw(Rect rect)
         {
-            ShowLabel(ref containerRect, containerStyle);
+            ShowLabel(ref rect);
 
             if (StateAsset is IState == false)
                 StateAsset = null;
 
             EditorGUI.BeginChangeCheck();
 
-            var preValidatedStateAsset = (ScriptableObject)EditorGUI.ObjectField(GetRect(ref containerRect, containerStyle), StateAsset, _scriptableObjectType, false);
+            var preValidatedStateAsset = (ScriptableObject)EditorGUI.ObjectField(GetFieldRect(ref rect), StateAsset, _scriptableObjectType, false);
 
             if (EditorGUI.EndChangeCheck())
             {
@@ -42,22 +42,16 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             }
         }
 
-        private Rect GetRect(ref Rect containerRect, GUIStyle containerStyle)
+        private void ShowLabel(ref Rect rect)
         {
-            var position = new Vector2(containerRect.position.x + LeftPadding, containerRect.position.y + containerStyle.border.top + FieldTopPadding);
-            var size = new Vector2(containerRect.size.x - (LeftPadding * 2), FieldSizeY);
-
-            return new Rect(position, size);
+            GUI.Label(rect, "State Asset");
         }
 
-        private void ShowLabel(ref Rect containerRect, GUIStyle containerStyle)
+        private Rect GetFieldRect(ref Rect labelRect)
         {
-            var position = new Vector2(containerRect.position.x + LeftPadding, containerRect.position.y + containerStyle.border.top + LabelTopPadding);
-            var size = new Vector2(containerRect.size.x - (LeftPadding * 2), LabelSizeY);
+            var position = new Vector2(labelRect.position.x, labelRect.position.y + FieldTopPadding);
 
-            var rect = new Rect(position, size);
-
-            GUI.Label(rect, "State Asset");
+            return new Rect(position, labelRect.size);
         }
     }
 }

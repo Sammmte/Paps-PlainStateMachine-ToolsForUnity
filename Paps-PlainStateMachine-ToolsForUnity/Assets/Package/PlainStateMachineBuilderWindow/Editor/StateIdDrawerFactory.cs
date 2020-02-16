@@ -8,25 +8,25 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         private static readonly Type _floatType = typeof(float);
         private static readonly Type _stringType = typeof(string);
 
-        public static StateIdDrawer CreateForType(Type type)
+        public static StateIdDrawer Create(Type stateIdType, IStateIdValidator stateIdValidator, object beginValue = null)
         {
-            if(type != null)
+            if(stateIdType != null)
             {
-                if (type == _intType)
+                if (stateIdType == _intType)
                 {
-                    return new IntStateIdDrawer();
+                    return new IntStateIdDrawer(stateIdValidator, beginValue);
                 }
-                else if (type == _floatType)
+                else if (stateIdType == _floatType)
                 {
-                    return new FloatStateIdDrawer();
+                    return new FloatStateIdDrawer(stateIdValidator, beginValue);
                 }
-                else if (type == _stringType)
+                else if (stateIdType == _stringType)
                 {
-                    return new StringStateIdDrawer();
+                    return new StringStateIdDrawer(stateIdValidator, beginValue);
                 }
-                else if (type.IsEnum)
+                else if (stateIdType.IsEnum)
                 {
-                    return new EnumStateIdDrawer(type);
+                    return new EnumStateIdDrawer(stateIdType, stateIdValidator, beginValue);
                 }
             }
 

@@ -1,6 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
 using UnityEditor;
-using System.Collections.Generic;
+using UnityEngine;
 
 namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
@@ -9,7 +9,9 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         private List<StateNode> _nodes;
 
         private BackgroundGridDrawer _gridDrawer;
-        private PlainStateMachineBuilderSettingsDrawer _plainStateMachineBuilderSettingsDrawer;
+        private PlainStateMachineBuilderSettingsDrawer _builderSettingsDrawer;
+
+        private StateIdValidator _stateIdValidator;
 
         private Vector2 _drag;
 
@@ -27,7 +29,9 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             _nodes = new List<StateNode>();
 
             _gridDrawer = new BackgroundGridDrawer();
-            _plainStateMachineBuilderSettingsDrawer = new PlainStateMachineBuilderSettingsDrawer();
+            _builderSettingsDrawer = new PlainStateMachineBuilderSettingsDrawer();
+
+            _stateIdValidator = new StateIdValidator();
         }
 
         private void OnGUI()
@@ -49,7 +53,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private void DrawBuilderSettings()
         {
-            _plainStateMachineBuilderSettingsDrawer.Draw(position);
+            _builderSettingsDrawer.Draw(position);
         }
 
         private void DrawNodes()
@@ -129,7 +133,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private void OnClickAddNode(Vector2 mousePosition)
         {
-            _nodes.Add(new StateNode(mousePosition));
+            _nodes.Add(new StateNode(mousePosition, _stateIdValidator, _builderSettingsDrawer.StateIdType));
         }
     }
 }

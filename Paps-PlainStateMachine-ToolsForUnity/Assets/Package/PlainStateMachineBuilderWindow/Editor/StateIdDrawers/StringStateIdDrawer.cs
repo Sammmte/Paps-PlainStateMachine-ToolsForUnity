@@ -4,9 +4,19 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
     public class StringStateIdDrawer : StateIdDrawer
     {
-        public override void Draw(Rect containerRect, GUIStyle containerStyle, object value)
+        public StringStateIdDrawer(IStateIdValidator stateIdValidator, object value) : base(value, stateIdValidator)
         {
-            throw new System.NotImplementedException();
+
+        }
+
+        public override void Draw(Rect rect)
+        {
+            
+        }
+
+        protected override bool IsValidType(object value)
+        {
+            return value.GetType() == typeof(string);
         }
     }
 }
