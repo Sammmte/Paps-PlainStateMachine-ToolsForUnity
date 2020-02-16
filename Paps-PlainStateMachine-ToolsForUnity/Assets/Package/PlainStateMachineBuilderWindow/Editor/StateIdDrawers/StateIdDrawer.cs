@@ -19,7 +19,26 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             }
         }
 
-        public abstract void Draw();
+        public void Draw()
+        {
+            DrawLabel();
+            DrawValueControl();
+        }
+
+        private void DrawLabel()
+        {
+            GUILayout.Label(GetLabel());
+        }
+
+        private string GetLabel()
+        {
+            if (StateId == null)
+                return "State Id (No Value)";
+            else
+                return "State Id";
+        }
+
+        protected abstract void DrawValueControl();
 
         protected abstract bool IsValidType(object value);
     }

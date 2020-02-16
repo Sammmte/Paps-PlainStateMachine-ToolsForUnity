@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System;
+using System.Reflection;
 
 namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
@@ -69,13 +70,26 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             {
                 if (string.IsNullOrEmpty(_enumTypeFullName) == false)
                 {
-                    StateIdType = Type.GetType(_enumTypeFullName);
+                    StateIdType = GetTypeOf(_enumTypeFullName);
                 }
                 else
                 {
                     StateIdType = null;
                 }
             }
+        }
+
+        private Type GetTypeOf(string typeName)
+        {
+            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                var type = assembly.GetType(typeName);
+
+                if (type != null)
+                    return type;
+            }
+
+            return null;
         }
 
         private void DrawStateIdRepresentationField(ref Rect containerRect)

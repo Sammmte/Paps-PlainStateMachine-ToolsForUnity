@@ -10,31 +10,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         }
 
-        public override void Draw()
-        {
-            DrawLabel();
-            DrawField();
-        }
-
-        protected override bool IsValidType(object value)
-        {
-            return value.GetType() == typeof(int);
-        }
-
-        private void DrawLabel()
-        {
-            GUILayout.Label(GetLabel());
-        }
-
-        private string GetLabel()
-        {
-            if (StateId == null)
-                return "State Id (No Value)";
-            else
-                return "State Id";
-        }
-
-        private void DrawField()
+        protected override void DrawValueControl()
         {
             EditorGUI.BeginChangeCheck();
 
@@ -45,7 +21,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             else
                 value = EditorGUILayout.TextField(value);
 
-            if(EditorGUI.EndChangeCheck())
+            if (EditorGUI.EndChangeCheck())
             {
                 if (int.TryParse(value, out int result) && stateIdValidator.IsValid(result))
                     StateId = result;
@@ -55,6 +31,11 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                     StateId = null;
                 }
             }
+        }
+
+        protected override bool IsValidType(object value)
+        {
+            return value.GetType() == typeof(int);
         }
     }
 }
