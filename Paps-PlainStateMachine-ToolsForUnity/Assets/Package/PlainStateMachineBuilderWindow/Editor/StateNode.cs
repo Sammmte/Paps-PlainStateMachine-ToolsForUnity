@@ -12,8 +12,8 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private const int ControlPaddingLeft = 20, ControlPaddingRight = 20, ControlPaddingTop = 20, ControlPaddingBottom = 20;
 
-        private static readonly Texture2D _asNormal = Resources.Load<Texture2D>("Paps/PlainStateMachine-ToolsForUnity/Textures/node_normal");
-        private static readonly Texture2D _asInitial = Resources.Load<Texture2D>("Paps/PlainStateMachine-ToolsForUnity/Textures/node_initial");
+        private static readonly Texture2D _asNormal = CreateNormalStateTexture();
+        private static readonly Texture2D _asInitial = CreateInitialStateTexture();
 
         public bool IsDragged { get; private set; }
 
@@ -32,7 +32,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private Rect _nodeRect;
         private GUIStyle _nodeStyle;
-        private GUIStyle _controlAreaStyle;
+        private GUIStyle _controlsAreaStyle;
 
         private StateAssetField _stateAssetField;
         private StateIdDrawer _stateIdDrawer;
@@ -42,8 +42,9 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         {
             _nodeRect = new Rect(position.x, position.y, Width, Height);
             _nodeStyle = new GUIStyle();
-            _controlAreaStyle = new GUIStyle();
-            _controlAreaStyle.padding = new RectOffset(ControlPaddingLeft, ControlPaddingRight, ControlPaddingTop, ControlPaddingBottom);
+
+            _controlsAreaStyle = new GUIStyle();
+            _controlsAreaStyle.padding = new RectOffset(ControlPaddingLeft, ControlPaddingRight, ControlPaddingTop, ControlPaddingBottom);
 
             _stateAssetField = new StateAssetField(stateAsset);
 
@@ -53,6 +54,24 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                 _stateIdDrawer = StateIdDrawerFactory.Create(stateIdType, _stateIdValidator, stateId);
 
             AsNormal();
+        }
+
+        private static Texture2D CreateNormalStateTexture()
+        {
+            var texture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+            texture.SetPixel(0, 0, Color.grey);
+            texture.Apply();
+
+            return texture;
+        }
+
+        private static Texture2D CreateInitialStateTexture()
+        {
+            var texture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+            texture.SetPixel(0, 0, new Color(235, 149, 50)); //orange
+            texture.Apply();
+
+            return texture;
         }
 
         public void SetNewStateIdType(Type stateIdType)
@@ -82,7 +101,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private void DrawControls()
         {
-            EditorGUILayout.BeginVertical(_controlAreaStyle);
+            EditorGUILayout.BeginVertical(_controlsAreaStyle);
             DrawStateIdDrawer();
             DrawStateAssetField();
             EditorGUILayout.EndVertical();

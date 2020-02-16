@@ -1,6 +1,6 @@
 ﻿namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
-    public enum StateIdRepresentation
+    public enum StateIdType
     {
         Int,
         Float,
