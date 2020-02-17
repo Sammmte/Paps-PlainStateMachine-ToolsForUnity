@@ -22,8 +22,12 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private string _enumTypeFullName = "";
 
-        public PlainStateMachineBuilderSettingsDrawer()
+        public PlainStateMachineBuilder PlainStateMachineBuilder { get; private set; }
+
+        public PlainStateMachineBuilderSettingsDrawer(PlainStateMachineBuilder builder = null)
         {
+            PlainStateMachineBuilder = builder;
+
             _boxStyle = new GUIStyle();
 
             var texture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
@@ -60,7 +64,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             EditorGUI.BeginChangeCheck();
             DrawControls();
 
-            if(EditorGUI.EndChangeCheck())
+            if (EditorGUI.EndChangeCheck())
             {
                 SetStateIdTypeByRepresentation();
                 OnStateIdTypeChanged?.Invoke(StateIdType);
@@ -103,13 +107,27 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             return null;
         }
 
+        private void DrawBuilderField()
+        {
+            GUILayout.Label("Plain State Machine Builder", _labelStyle);
+            PlainStateMachineBuilder = (PlainStateMachineBuilder)EditorGUILayout.ObjectField(PlainStateMachineBuilder, typeof(ScriptableObject), false);
+        }
+
         private void DrawControls()
         {
             EditorGUILayout.BeginVertical(_controlsAreaStyle);
-            DrawStateIdRepresentationField();
-            if (StateIdRepresentation == Editor.StateIdType.Enum)
+
+            DrawBuilderField();
+
+            GUILayout.Space(20);
+
+            if (PlainStateMachineBuilder != null)
             {
-                DrawEnumTypeField();
+                DrawStateIdRepresentationField();
+                if (StateIdRepresentation == Editor.StateIdType.Enum)
+                {
+                    DrawEnumTypeField();
+                }
             }
             EditorGUILayout.EndVertical();
         }

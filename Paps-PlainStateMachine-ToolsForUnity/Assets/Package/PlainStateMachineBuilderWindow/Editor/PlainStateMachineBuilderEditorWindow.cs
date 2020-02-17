@@ -19,18 +19,24 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         [MenuItem("Paps/Plain State Machine Builder")]
         private static void OpenWindow()
         {
+            OpenWindow(null);
+        }
+
+        public static void OpenWindow(PlainStateMachineBuilder builder)
+        {
             var window = GetWindow<PlainStateMachineBuilderEditorWindow>();
+            window.Initialize(builder);
             window.Show();
         }
 
-        void Awake()
+        void Initialize(PlainStateMachineBuilder builder = null)
         {
             titleContent = new GUIContent("Plain State Machine Builder Window");
             
             _nodes = new List<StateNode>();
 
             _gridDrawer = new BackgroundGridDrawer();
-            _builderSettingsDrawer = new PlainStateMachineBuilderSettingsDrawer();
+            _builderSettingsDrawer = new PlainStateMachineBuilderSettingsDrawer(builder);
 
             _stateIdValidator = new StateIdValidator();
 
@@ -70,6 +76,41 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             }
         }
 
+        private void OnDrag(Vector2 delta)
+        {
+            _drag = delta;
+
+            if (_nodes != null)
+            {
+                for (int i = 0; i < _nodes.Count; i++)
+                {
+                    _nodes[i].Drag(delta);
+                }
+            }
+
+            GUI.changed = true;
+        }
+
+        private void ProcessContextMenu(Vector2 mousePosition)
+        {
+            GenericMenu genericMenu = new GenericMenu();
+            genericMenu.AddItem(new GUIContent("Add node"), false, () => OnClickAddNode(mousePosition));
+            genericMenu.ShowAsContext();
+        }
+
+        private void OnClickAddNode(Vector2 mousePosition)
+        {
+            _nodes.Add(new StateNode(mousePosition, _stateIdValidator, _builderSettingsDrawer.StateIdType));
+        }
+
+        private void OnStateIdTypeChanged(Type newType)
+        {
+            for(int i = 0; i < _nodes.Count; i++)
+            {
+                _nodes[i].SetNewStateIdType(newType);
+            }
+        }
+
         private void ProcessEvents(Event e)
         {
             switch (e.type)
@@ -96,21 +137,6 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             }
         }
 
-        private void OnDrag(Vector2 delta)
-        {
-            _drag = delta;
-
-            if (_nodes != null)
-            {
-                for (int i = 0; i < _nodes.Count; i++)
-                {
-                    _nodes[i].Drag(delta);
-                }
-            }
-
-            GUI.changed = true;
-        }
-
         private void ProcessNodeEvents(Event e)
         {
             if (_nodes.Count > 0)
@@ -124,26 +150,6 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                         GUI.changed = true;
                     }
                 }
-            }
-        }
-
-        private void ProcessContextMenu(Vector2 mousePosition)
-        {
-            GenericMenu genericMenu = new GenericMenu();
-            genericMenu.AddItem(new GUIContent("Add node"), false, () => OnClickAddNode(mousePosition));
-            genericMenu.ShowAsContext();
-        }
-
-        private void OnClickAddNode(Vector2 mousePosition)
-        {
-            _nodes.Add(new StateNode(mousePosition, _stateIdValidator, _builderSettingsDrawer.StateIdType));
-        }
-
-        private void OnStateIdTypeChanged(Type newType)
-        {
-            for(int i = 0; i < _nodes.Count; i++)
-            {
-                _nodes[i].SetNewStateIdType(newType);
             }
         }
     }
