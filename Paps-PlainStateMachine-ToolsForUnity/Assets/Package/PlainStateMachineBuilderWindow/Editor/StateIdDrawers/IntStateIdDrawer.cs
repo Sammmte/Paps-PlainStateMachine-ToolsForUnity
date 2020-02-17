@@ -27,7 +27,11 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                     StateId = result;
                 else
                 {
-                    Debug.LogWarning("Value " + value + " is not an Integer");
+                    if(string.IsNullOrEmpty(value) == false)
+                    {
+                        Debug.LogWarning("Value " + value + " is not an Integer");
+                    }
+                    
                     StateId = null;
                 }
             }

@@ -27,7 +27,11 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                     StateId = result;
                 else
                 {
-                    Debug.LogWarning("Value " + value + " is not a Float");
+                    if(string.IsNullOrEmpty(value) == false)
+                    {
+                        Debug.LogWarning("Value " + value + " is not a Float");
+                    }
+
                     StateId = null;
                 }
             }
