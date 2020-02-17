@@ -11,11 +11,16 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         private const float Height = 150;
 
         private const int ControlPaddingLeft = 20, ControlPaddingRight = 20, ControlPaddingTop = 20, ControlPaddingBottom = 20;
+        private const float SelectedExtraPixels = 5;
+        private static readonly float SelectedHalfExtraPixels = SelectedExtraPixels / 2;
 
-        private static readonly Texture2D _asNormal = CreateNormalStateTexture();
-        private static readonly Texture2D _asInitial = CreateInitialStateTexture();
+        private static readonly Texture2D _asNormal = CreateBackgroundTexture(Color.grey);
+        private static readonly Texture2D _asInitial = CreateBackgroundTexture(new Color(235f / 255f, 149f / 255f, 50f / 255f)); //orange
+
+        private static readonly Texture2D _selectedTexture = CreateBackgroundTexture(new Color(44f / 255f, 130f / 255f, 201f / 255f)); //blue
 
         public bool IsDragged { get; private set; }
+        public bool IsSelected { get; private set; }
 
         public object StateId
         {
@@ -30,8 +35,11 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         public IState StateObject => _stateAssetField.StateAsset as IState;
 
+        public Action<StateNode> OnSelected, OnDeselected;
+
         private Rect _nodeRect;
         private GUIStyle _nodeStyle;
+        private GUIStyle _selectedNodeStyle;
         private GUIStyle _controlsAreaStyle;
 
         private StateAssetField _stateAssetField;
@@ -40,8 +48,13 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         public StateNode(Vector2 position, IStateIdValidator stateIdValidator, Type stateIdType = null, ScriptableObject stateAsset = null, object stateId = null)
         {
+            
+
             _nodeRect = new Rect(position.x, position.y, Width, Height);
             _nodeStyle = new GUIStyle();
+
+            _selectedNodeStyle = new GUIStyle();
+            _selectedNodeStyle.normal.background = _selectedTexture;
 
             _controlsAreaStyle = new GUIStyle();
             _controlsAreaStyle.padding = new RectOffset(ControlPaddingLeft, ControlPaddingRight, ControlPaddingTop, ControlPaddingBottom);
@@ -56,19 +69,10 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             AsNormal();
         }
 
-        private static Texture2D CreateNormalStateTexture()
+        private static Texture2D CreateBackgroundTexture(Color color)
         {
             var texture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-            texture.SetPixel(0, 0, Color.grey);
-            texture.Apply();
-
-            return texture;
-        }
-
-        private static Texture2D CreateInitialStateTexture()
-        {
-            var texture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-            texture.SetPixel(0, 0, new Color(235, 149, 50)); //orange
+            texture.SetPixel(0, 0, color);
             texture.Apply();
 
             return texture;
@@ -94,8 +98,23 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         public void Draw()
         {
+            if(IsSelected)
+                DrawAsSelected();
+
             GUILayout.BeginArea(_nodeRect, _nodeStyle);
             DrawControls();
+            GUILayout.EndArea();
+        }
+
+        private void DrawAsSelected()
+        {
+
+            var selectedNodeRect = new Rect(
+                new Vector2(_nodeRect.position.x - SelectedHalfExtraPixels, _nodeRect.position.y - SelectedHalfExtraPixels),
+                new Vector2(_nodeRect.size.x + SelectedExtraPixels, _nodeRect.size.y + SelectedExtraPixels)
+                );
+
+            GUILayout.BeginArea(selectedNodeRect, _selectedNodeStyle);
             GUILayout.EndArea();
         }
 
@@ -126,13 +145,21 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             {
                 case EventType.MouseDown:
                     
-                    if(WantsToDrag(ev))
+                    if(ClickedOver(ev))
                     {
                         IsDragged = true;
+                        IsSelected = true;
+                        OnSelected?.Invoke(this);
                         GUI.changed = true;
                     }
                     else
                     {
+                        bool wasSelected = IsSelected;
+                        IsSelected = false;
+
+                        if (wasSelected)
+                            OnDeselected?.Invoke(this);
+
                         GUI.changed = true;
                     }
 
@@ -159,11 +186,11 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             return false;
         }
 
-        private bool WantsToDrag(Event ev)
+        private bool ClickedOver(Event mouseClickEvent)
         {
-            if (ev.button == 0)
+            if (mouseClickEvent.button == 0 && _nodeRect.Contains(mouseClickEvent.mousePosition))
             {
-                if (_nodeRect.Contains(ev.mousePosition))
+                if (_nodeRect.Contains(mouseClickEvent.mousePosition))
                 {
                     return true;
                 }
@@ -192,12 +219,9 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             _nodeStyle.normal.background = _asInitial;
         }
 
-        private Rect GetRect(ref Rect containerRect, GUIStyle containerStyle, float leftPadding, float topPadding, float sizeY)
+        public Rect GetRect()
         {
-            var position = new Vector2(containerRect.position.x + leftPadding, containerRect.position.y + containerStyle.border.top + topPadding);
-            var size = new Vector2(containerRect.size.x - (leftPadding * 2), sizeY);
-
-            return new Rect(position, size);
+            return _nodeRect;
         }
     }
 }
