@@ -151,7 +151,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
             _enumTypeFullName = EditorGUILayout.TextField(_enumTypeFullName);
 
-            EditorGUILayout.HelpBox("If the enum type is a nested type, the name would like this:\nTheNamespace.TheClass+NestedEnum", MessageType.Info);
+            EditorGUILayout.HelpBox("If the enum type is a nested type, the name would be like this:\nTheNamespace.TheClass+NestedEnum", MessageType.Info);
         }
     }
 }
