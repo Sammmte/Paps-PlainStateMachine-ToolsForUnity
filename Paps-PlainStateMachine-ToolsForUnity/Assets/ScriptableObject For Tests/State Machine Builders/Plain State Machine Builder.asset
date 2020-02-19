@@ -12,3 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52feb79c99b521445899038aba144e4f, type: 3}
   m_Name: Plain State Machine Builder
   m_EditorClassIdentifier: 
+  _states: []
+  _stateIdParserMethodInfo:
+    TypeFullName: System.Int32
+    MethodName: Parse
+  _triggerParserMethodInfo:
+    TypeFullName: System.Int32
+    MethodName: Parse
+  _stateIdTypeFullName: System.Int32
+  _triggerTypeFullName: System.Int32
