@@ -18,26 +18,7 @@ namespace Tests
 
         public void Start()
         {
-            Func<string, int> parser = int.Parse;
-
-            _stateMachineBuilder = ScriptableObject.CreateInstance<PlainStateMachineBuilder>();
-
-            _stateMachineBuilder.SetStateIdTypeWithParser(typeof(int), parser.Method);
-            _stateMachineBuilder.SetTriggerTypeWithParser(typeof(int), parser.Method);
-
-            _stateMachineBuilder.AddState(1, _state1);
-            _stateMachineBuilder.AddState(2, _state2);
-
-            _stateMachineBuilder.RemoveState(2);
-
-            var stateMachine = _stateMachineBuilder.Build<int, int>();
-
-            var states = stateMachine.GetStates();
-
-            for (int i = 0; i < states.Length; i++)
-            {
-                Debug.Log("State Id: " + states[i]);
-            }
+            
         }
     }
 
