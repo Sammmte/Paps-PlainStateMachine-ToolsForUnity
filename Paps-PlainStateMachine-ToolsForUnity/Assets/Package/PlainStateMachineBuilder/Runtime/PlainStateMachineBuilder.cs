@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System;
 using Paps.StateMachines;
-using UnityObject = UnityEngine.Object;
 using System.Reflection;
 using System.Collections.Generic;
 
@@ -58,15 +57,19 @@ namespace Paps.PlainStateMachine_ToolsForUnity
         [HideInInspector]
         private string _stateIdTypeFullName, _triggerTypeFullName;
 
+        [SerializeField]
+        [HideInInspector]
+        private List<Metadata> _metadata;
+
         private Type _stateIdType;
         private Type _triggerType;
 
-        internal void AddState<T>(object stateId, T stateObject) where T : UnityObject, IState
+        internal void AddState(object stateId, ScriptableState stateObject)
         {
             if (_states == null)
                 _states = new List<StateInfo>();
 
-            _states.Add(new StateInfo() { StateId = stateId.ToString(), StateObject = stateObject });
+            _states.Add(new StateInfo() { StateId = PlainStateMachineGenericTypeSerializer.Serialize(stateId), StateObject = stateObject });
             OnChanged?.Invoke();
         }
 
@@ -74,7 +77,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity
         {
             if(_states != null)
             {
-                string stringStateId = stateId.ToString();
+                string stringStateId = PlainStateMachineGenericTypeSerializer.Serialize(stateId);
 
                 for(int i = 0; i < _states.Count; i++)
                 {
@@ -101,7 +104,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity
             return null;
         }
 
-        public PlainStateMachine<TState, TTrigger> Build<TState, TTrigger>()
+        private PlainStateMachine<TState, TTrigger> Build<TState, TTrigger>()
         {
             var stateMachine = new PlainStateMachine<TState, TTrigger>();
 
@@ -124,6 +127,54 @@ namespace Paps.PlainStateMachine_ToolsForUnity
                 .Invoke(this, null);
         }
 
+        internal void SetMetadata(string key, string value)
+        {
+            if (ContainsKey(key) == false)
+                _metadata.Add(new Metadata() { Key = key, Value = value });
+            else
+            {
+                for (int i = 0; i < _metadata.Count; i++)
+                {
+                    if (_metadata[i].Key == key)
+                        _metadata[i].Value = value;
+                }
+            }
+        }
+
+        internal void RemoveMetadata(string key)
+        {
+            if(ContainsKey(key))
+            {
+                for (int i = 0; i < _metadata.Count; i++)
+                {
+                    if (_metadata[i].Key == key)
+                        _metadata.RemoveAt(i);
+                }
+            }
+        }
+
+        internal string GetMetadata(string key)
+        {
+            for(int i = 0; i < _metadata.Count; i++)
+            {
+                if (_metadata[i].Key == key)
+                    return _metadata[i].Value;
+            }
+
+            return string.Empty;
+        }
+
+        internal bool ContainsKey(string key)
+        {
+            for(int i = 0; i < _metadata.Count; i++)
+            {
+                if (_metadata[i].Key == key)
+                    return true;
+            }
+
+            return false;
+        }
+
         [Serializable]
         private struct StateInfo
         {
@@ -131,7 +182,14 @@ namespace Paps.PlainStateMachine_ToolsForUnity
             public string StateId;
 
             [SerializeField]
-            public UnityObject StateObject;
+            public ScriptableState StateObject;
+        }
+
+        [Serializable]
+        private class Metadata
+        {
+            [SerializeField]
+            public string Key, Value;
         }
     }
 }
