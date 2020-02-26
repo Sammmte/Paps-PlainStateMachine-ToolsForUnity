@@ -12,6 +12,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         private BackgroundGridDrawer _gridDrawer;
         private PlainStateMachineBuilderSettingsDrawer _builderSettingsDrawer;
         private WindowEventHandler _windowEventHandler;
+        private StateNodeEventHandler _nodeEventHandler;
 
         private StateIdValidator _stateIdValidator;
 
@@ -37,6 +38,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             _gridDrawer = new BackgroundGridDrawer();
             _builderSettingsDrawer = new PlainStateMachineBuilderSettingsDrawer(builder);
             _windowEventHandler = new WindowEventHandler(this);
+            _nodeEventHandler = new StateNodeEventHandler(this);
             _stateIdValidator = new StateIdValidator();
 
             _builderSettingsDrawer.OnStateIdTypeChanged += OnStateIdTypeChanged;
@@ -88,9 +90,14 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             GUI.changed = true;
         }
 
-        internal void AddNodeAtPosition(Vector2 mousePosition)
+        internal void AddNode(Vector2 mousePosition)
         {
             _nodes.Add(new StateNode(mousePosition, _stateIdValidator, _builderSettingsDrawer.StateIdType));
+        }
+
+        internal bool RemoveNode(StateNode node)
+        {
+            return _nodes.Remove(node);
         }
 
         private void OnStateIdTypeChanged(Type newType)
@@ -112,13 +119,34 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             {
                 for (int i = _nodes.Count - 1; i >= 0; i--)
                 {
-                    bool guiChanged = _nodes[i].ProcessEvents(e);
-
-                    if (guiChanged)
-                    {
-                        GUI.changed = true;
-                    }
+                    var currentNode = _nodes[i];
+                    
+                    _nodeEventHandler.HandleEventFor(currentNode, e);
                 }
+            }
+        }
+
+        internal void SelectNode(StateNode node)
+        {
+            for (int i = 0; i < _nodes.Count; i++)
+            {
+                var currentNode = _nodes[i];
+
+                if (currentNode == node)
+                    currentNode.Select();
+                else
+                    currentNode.Deselect();
+            }
+        }
+
+        internal void DeselectNode(StateNode node)
+        {
+            for (int i = 0; i < _nodes.Count; i++)
+            {
+                var currentNode = _nodes[i];
+
+                if (currentNode == node)
+                    currentNode.Deselect();
             }
         }
     }

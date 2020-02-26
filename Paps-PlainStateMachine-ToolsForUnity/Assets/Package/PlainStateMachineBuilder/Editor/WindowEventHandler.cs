@@ -20,9 +20,10 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             {
                 case EventType.MouseDown:
 
-                    if (windowEvent.button == 1)
+                    if (IsRightMouseClick(windowEvent.button))
                     {
-                        DisplayGeneralOptionsMenuAtPosition(windowEvent.mousePosition);
+                        DisplayGeneralOptionsMenu(windowEvent.mousePosition);
+                        windowEvent.Use();
                     }
 
                     break;
@@ -32,6 +33,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                     if (IsLeftMouseClick(windowEvent.button))
                     {
                         _window.Drag(windowEvent.delta);
+                        windowEvent.Use();
                     }
 
                     break;
@@ -43,10 +45,15 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             return button == 0;
         }
 
-        private void DisplayGeneralOptionsMenuAtPosition(Vector2 position)
+        private bool IsRightMouseClick(int button)
+        {
+            return button == 1;
+        }
+
+        private void DisplayGeneralOptionsMenu(Vector2 position)
         {
             GenericMenu genericMenu = new GenericMenu();
-            genericMenu.AddItem(new GUIContent("Add node"), false, () => _window.AddNodeAtPosition(position));
+            genericMenu.AddItem(new GUIContent("Add node"), false, () => _window.AddNode(position));
             genericMenu.ShowAsContext();
         }
     }

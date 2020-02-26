@@ -5,7 +5,7 @@ using UnityEditor;
 
 namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
-    public class StateNode
+    internal class StateNode
     {
         private const float Width = 200;
         private const float Height = 150;
@@ -48,8 +48,6 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         public StateNode(Vector2 position, IStateIdValidator stateIdValidator, Type stateIdType = null, ScriptableObject stateAsset = null, object stateId = null)
         {
-            
-
             _nodeRect = new Rect(position.x, position.y, Width, Height);
             _nodeStyle = new GUIStyle();
 
@@ -139,7 +137,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                 _stateIdDrawer.Draw();
         }
 
-        public bool ProcessEvents(Event ev)
+        /*public bool ProcessEvents(Event ev)
         {
             switch (ev.type)
             {
@@ -184,6 +182,16 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             }
 
             return false;
+        }*/
+
+        public void Select()
+        {
+            IsSelected = true;
+        }
+
+        public void Deselect()
+        {
+            IsSelected = false;
         }
 
         private bool ClickedOver(Event mouseClickEvent)
