@@ -33,7 +33,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             }
         }
 
-        public IState StateObject => _stateAssetField.StateAsset as IState;
+        public ScriptableState StateObject => _stateAssetField.StateAsset;
 
         public Action<StateNode> OnSelected, OnDeselected;
 
@@ -46,7 +46,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         private StateIdDrawer _stateIdDrawer;
         private IStateIdValidator _stateIdValidator;
 
-        public StateNode(Vector2 position, IStateIdValidator stateIdValidator, Type stateIdType = null, ScriptableObject stateAsset = null, object stateId = null)
+        public StateNode(Vector2 position, IStateIdValidator stateIdValidator, Type stateIdType = null, ScriptableState stateAsset = null, object stateId = null)
         {
             _nodeRect = new Rect(position.x, position.y, Width, Height);
             _nodeStyle = new GUIStyle();
@@ -136,53 +136,6 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             else
                 _stateIdDrawer.Draw();
         }
-
-        /*public bool ProcessEvents(Event ev)
-        {
-            switch (ev.type)
-            {
-                case EventType.MouseDown:
-                    
-                    if(ClickedOver(ev))
-                    {
-                        IsDragged = true;
-                        IsSelected = true;
-                        OnSelected?.Invoke(this);
-                        GUI.changed = true;
-                    }
-                    else
-                    {
-                        bool wasSelected = IsSelected;
-                        IsSelected = false;
-
-                        if (wasSelected)
-                            OnDeselected?.Invoke(this);
-
-                        GUI.changed = true;
-                    }
-
-                    break;
-
-                case EventType.MouseUp:
-
-                    IsDragged = false;
-
-                    break;
-
-                case EventType.MouseDrag:
-
-                    if (IsDragging(ev))
-                    {
-                        Drag(ev.delta);
-                        ev.Use();
-                        return true;
-                    }
-
-                    break;
-            }
-
-            return false;
-        }*/
 
         public void Select()
         {

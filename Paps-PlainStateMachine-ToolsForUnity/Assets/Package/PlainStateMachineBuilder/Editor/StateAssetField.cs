@@ -7,11 +7,11 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
     public class StateAssetField
     {
-        private static readonly Type _scriptableObjectType = typeof(ScriptableObject);
+        private static readonly Type _stateObjectType = typeof(ScriptableState);
 
-        public ScriptableObject StateAsset { get; private set; }
+        public ScriptableState StateAsset { get; private set; }
 
-        public StateAssetField(ScriptableObject stateAsset)
+        public StateAssetField(ScriptableState stateAsset)
         {
             StateAsset = stateAsset;
         }
@@ -29,7 +29,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         {
             EditorGUI.BeginChangeCheck();
 
-            var preValidatedStateAsset = (ScriptableObject)EditorGUILayout.ObjectField(StateAsset, _scriptableObjectType, false);
+            var preValidatedStateAsset = (ScriptableState)EditorGUILayout.ObjectField(StateAsset, _stateObjectType, false);
 
             if (EditorGUI.EndChangeCheck())
             {

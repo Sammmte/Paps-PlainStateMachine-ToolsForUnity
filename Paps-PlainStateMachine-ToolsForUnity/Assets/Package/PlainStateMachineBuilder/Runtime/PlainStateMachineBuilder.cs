@@ -3,9 +3,12 @@ using System;
 using Paps.StateMachines;
 using System.Reflection;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
+[assembly: InternalsVisibleTo("Paps.PlainStateMachine_ToolsForUnity.Editor")]
 namespace Paps.PlainStateMachine_ToolsForUnity
 {
+    
     [CreateAssetMenu(menuName = "Paps/State Machine Builders/Plain State Machine Builder")]
     public class PlainStateMachineBuilder : ScriptableObject
     {
@@ -73,6 +76,16 @@ namespace Paps.PlainStateMachine_ToolsForUnity
             OnChanged?.Invoke();
         }
 
+        internal string GetSerializedGenericTypeOf(object stateIdOrTrigger)
+        {
+            return PlainStateMachineGenericTypeSerializer.Serialize(stateIdOrTrigger);
+        }
+
+        internal object GetDeserializedGenericTypeOf(string serializedStateIdOrTrigger, Type type)
+        {
+            return PlainStateMachineGenericTypeSerializer.Deserialize(serializedStateIdOrTrigger, type);
+        }
+
         internal void RemoveState(object stateId)
         {
             if(_states != null)
@@ -89,6 +102,14 @@ namespace Paps.PlainStateMachine_ToolsForUnity
                     }
                 }
             }
+        }
+
+        internal StateInfo[] GetStates()
+        {
+            if (_states.Count > 0)
+                return _states.ToArray();
+            else
+                return null;
         }
 
         private Type GetTypeOf(string typeName)
@@ -122,28 +143,28 @@ namespace Paps.PlainStateMachine_ToolsForUnity
         public object Build()
         {
             return GetType()
-                .GetMethod("Build")
+                .GetMethod("Build", BindingFlags.NonPublic)
                 .MakeGenericMethod(StateIdType, TriggerType)
                 .Invoke(this, null);
         }
 
-        internal void SetMetadata(string key, string value)
+        internal void SetMetadata(string key, object value)
         {
-            if (ContainsKey(key) == false)
-                _metadata.Add(new Metadata() { Key = key, Value = value });
+            if (ContainsMetadataKey(key) == false)
+                _metadata.Add(new Metadata() { Key = key, Value = JsonUtility.ToJson(value) });
             else
             {
                 for (int i = 0; i < _metadata.Count; i++)
                 {
                     if (_metadata[i].Key == key)
-                        _metadata[i].Value = value;
+                        _metadata[i].Value = JsonUtility.ToJson(value);
                 }
             }
         }
 
         internal void RemoveMetadata(string key)
         {
-            if(ContainsKey(key))
+            if(ContainsMetadataKey(key))
             {
                 for (int i = 0; i < _metadata.Count; i++)
                 {
@@ -153,18 +174,18 @@ namespace Paps.PlainStateMachine_ToolsForUnity
             }
         }
 
-        internal string GetMetadata(string key)
+        internal T GetMetadata<T>(string key)
         {
             for(int i = 0; i < _metadata.Count; i++)
             {
                 if (_metadata[i].Key == key)
-                    return _metadata[i].Value;
+                    return JsonUtility.FromJson<T>(_metadata[i].Value);
             }
 
-            return string.Empty;
+            return default;
         }
 
-        internal bool ContainsKey(string key)
+        internal bool ContainsMetadataKey(string key)
         {
             for(int i = 0; i < _metadata.Count; i++)
             {
@@ -173,16 +194,6 @@ namespace Paps.PlainStateMachine_ToolsForUnity
             }
 
             return false;
-        }
-
-        [Serializable]
-        private struct StateInfo
-        {
-            [SerializeField]
-            public string StateId;
-
-            [SerializeField]
-            public ScriptableState StateObject;
         }
 
         [Serializable]

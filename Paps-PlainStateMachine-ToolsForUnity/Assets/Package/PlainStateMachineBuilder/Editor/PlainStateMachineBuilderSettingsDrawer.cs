@@ -5,15 +5,18 @@ using System.Reflection;
 
 namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
-    public class PlainStateMachineBuilderSettingsDrawer
+    internal class PlainStateMachineBuilderSettingsDrawer
     {
+        private const StateIdType DefaultStateIdType = Editor.StateIdType.Int;
+
         private const float Width = 300, Height = 400, RightPadding = 10, TopPadding = 10;
 
-        public StateIdType StateIdRepresentation { get; private set; }
+        private StateIdType _stateIdRepresentation { get; set; }
 
         public Type StateIdType { get; private set; }
 
         public event Action<Type> OnStateIdTypeChanged;
+        public event Action<PlainStateMachineBuilder> OnBuilderChanged;
 
         private GUIStyle _boxStyle;
         private GUIStyle _titleStyle;
@@ -47,7 +50,27 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             _controlsAreaStyle = new GUIStyle();
             _controlsAreaStyle.padding = new RectOffset(20, 20, 20, 20);
 
+            if (builder != null)
+                _stateIdRepresentation = GetStateIdTypeByRawType(builder.StateIdType);
+
             SetStateIdTypeByRepresentation();
+        }
+
+        private StateIdType GetStateIdTypeByRawType(Type type)
+        {
+            if (type == null)
+                return DefaultStateIdType;
+
+            if (type == typeof(int))
+                return Editor.StateIdType.Int;
+            else if (type == typeof(float))
+                return Editor.StateIdType.Float;
+            else if (type == typeof(string))
+                return Editor.StateIdType.String;
+            else if (type.IsEnum)
+                return Editor.StateIdType.Enum;
+
+            return DefaultStateIdType;
         }
 
         public void Draw(Rect windowRect)
@@ -75,13 +98,13 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private void SetStateIdTypeByRepresentation()
         {
-            if (StateIdRepresentation == Editor.StateIdType.Int)
+            if (_stateIdRepresentation == Editor.StateIdType.Int)
                 StateIdType = typeof(int);
-            else if (StateIdRepresentation == Editor.StateIdType.Float)
+            else if (_stateIdRepresentation == Editor.StateIdType.Float)
                 StateIdType = typeof(float);
-            else if (StateIdRepresentation == Editor.StateIdType.String)
+            else if (_stateIdRepresentation == Editor.StateIdType.String)
                 StateIdType = typeof(string);
-            else if (StateIdRepresentation == Editor.StateIdType.Enum)
+            else if (_stateIdRepresentation == Editor.StateIdType.Enum)
             {
                 if (string.IsNullOrEmpty(_enumTypeFullName) == false)
                 {
@@ -110,7 +133,13 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         private void DrawBuilderField()
         {
             GUILayout.Label("Plain State Machine Builder", _labelStyle);
-            PlainStateMachineBuilder = (PlainStateMachineBuilder)EditorGUILayout.ObjectField(PlainStateMachineBuilder, typeof(ScriptableObject), false);
+            var preEventBuilderValue = (PlainStateMachineBuilder)EditorGUILayout.ObjectField(PlainStateMachineBuilder, typeof(ScriptableObject), false);
+
+            if(preEventBuilderValue != PlainStateMachineBuilder)
+            {
+                PlainStateMachineBuilder = preEventBuilderValue;
+                OnBuilderChanged?.Invoke(PlainStateMachineBuilder);
+            }
         }
 
         private void DrawControls()
@@ -124,7 +153,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             if (PlainStateMachineBuilder != null)
             {
                 DrawStateIdRepresentationField();
-                if (StateIdRepresentation == Editor.StateIdType.Enum)
+                if (_stateIdRepresentation == Editor.StateIdType.Enum)
                 {
                     DrawEnumTypeField();
                 }
@@ -135,7 +164,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         private void DrawStateIdRepresentationField()
         {
             GUILayout.Label("State Id Type", _labelStyle);
-            StateIdRepresentation = (StateIdType)EditorGUILayout.EnumPopup(StateIdRepresentation);
+            _stateIdRepresentation = (StateIdType)EditorGUILayout.EnumPopup(_stateIdRepresentation);
         }
 
         private void DrawTitle()
