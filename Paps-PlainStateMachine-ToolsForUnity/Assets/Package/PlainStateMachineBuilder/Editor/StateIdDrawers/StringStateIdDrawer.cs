@@ -5,7 +5,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
     public class StringStateIdDrawer : StateIdDrawer
     {
-        public StringStateIdDrawer(IStateIdValidator stateIdValidator, object value) : base(value, stateIdValidator)
+        public StringStateIdDrawer(object value) : base(value)
         {
 
         }

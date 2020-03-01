@@ -33,20 +33,22 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             }
         }
 
-        public ScriptableState StateObject => _stateAssetField.StateAsset;
+        public ScriptableState StateObject { get; private set; }
 
         public Action<StateNode> OnSelected, OnDeselected;
+
+        public Action<StateNode, object, object> OnStateIdChanged;
+        public Action<StateNode, ScriptableState, ScriptableState> OnStateObjectChanged;
+        public Action<StateNode, Vector2> OnPositionChanged;
 
         private Rect _nodeRect;
         private GUIStyle _nodeStyle;
         private GUIStyle _selectedNodeStyle;
         private GUIStyle _controlsAreaStyle;
 
-        private StateAssetField _stateAssetField;
         private StateIdDrawer _stateIdDrawer;
-        private IStateIdValidator _stateIdValidator;
 
-        public StateNode(Vector2 position, IStateIdValidator stateIdValidator, Type stateIdType = null, ScriptableState stateAsset = null, object stateId = null)
+        public StateNode(Vector2 position,Type stateIdType = null, ScriptableState stateAsset = null, object stateId = null)
         {
             _nodeRect = new Rect(position.x, position.y, Width, Height);
             _nodeStyle = new GUIStyle();
@@ -57,14 +59,10 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             _controlsAreaStyle = new GUIStyle();
             _controlsAreaStyle.padding = new RectOffset(ControlPaddingLeft, ControlPaddingRight, ControlPaddingTop, ControlPaddingBottom);
 
-            _stateAssetField = new StateAssetField(stateAsset);
-
-            _stateIdValidator = stateIdValidator;
-
             if(stateIdType != null)
-                _stateIdDrawer = StateIdDrawerFactory.Create(stateIdType, _stateIdValidator, stateId);
+                _stateIdDrawer = StateIdDrawerFactory.Create(stateIdType, stateId);
 
-            AsNormal();
+            ShowAsNormal();
         }
 
         private static Texture2D CreateBackgroundTexture(Color color)
@@ -81,7 +79,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             if (stateIdType == null)
                 _stateIdDrawer = null;
             else
-                _stateIdDrawer = StateIdDrawerFactory.Create(stateIdType, _stateIdValidator);
+                _stateIdDrawer = StateIdDrawerFactory.Create(stateIdType);
         }
 
         public void ShowNullTypeDrawer()
@@ -92,6 +90,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         public void Drag(Vector2 delta)
         {
             _nodeRect.position += delta;
+            OnPositionChanged?.Invoke(this, _nodeRect.position);
         }
 
         public void Draw()
@@ -106,7 +105,6 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private void DrawAsSelected()
         {
-
             var selectedNodeRect = new Rect(
                 new Vector2(_nodeRect.position.x - SelectedHalfExtraPixels, _nodeRect.position.y - SelectedHalfExtraPixels),
                 new Vector2(_nodeRect.size.x + SelectedExtraPixels, _nodeRect.size.y + SelectedExtraPixels)
@@ -119,14 +117,23 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         private void DrawControls()
         {
             EditorGUILayout.BeginVertical(_controlsAreaStyle);
+
+            var previousStateId = StateId;
             DrawStateIdDrawer();
+            if (previousStateId != StateId) OnStateIdChanged(this, previousStateId, StateId);
+
+            EditorGUI.BeginChangeCheck();
+            var previousStateObject = StateObject;
             DrawStateAssetField();
+            if (EditorGUI.EndChangeCheck()) OnStateObjectChanged(this, previousStateObject, StateObject);
+
             EditorGUILayout.EndVertical();
         }
 
         private void DrawStateAssetField()
         {
-            _stateAssetField.Draw();
+            GUILayout.Label("State Asset");
+            StateObject = (ScriptableState)EditorGUILayout.ObjectField(StateObject, typeof(ScriptableState), false);
         }
 
         private void DrawStateIdDrawer()
@@ -170,12 +177,12 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             return false;
         }
 
-        public void AsNormal()
+        public void ShowAsNormal()
         {
             _nodeStyle.normal.background = _asNormal;
         }
 
-        public void AsInitial()
+        public void ShowAsInitial()
         {
             _nodeStyle.normal.background = _asInitial;
         }

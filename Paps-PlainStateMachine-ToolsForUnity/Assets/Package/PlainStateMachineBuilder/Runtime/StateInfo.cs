@@ -7,7 +7,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity
     public struct StateInfo
     {
         [SerializeField]
-        public string StateId;
+        public string SerializedStateId;
 
         [SerializeField]
         public ScriptableState StateObject;

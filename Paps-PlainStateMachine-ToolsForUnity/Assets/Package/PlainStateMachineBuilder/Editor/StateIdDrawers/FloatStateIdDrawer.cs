@@ -5,7 +5,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
     public class FloatStateIdDrawer : StateIdDrawer
     {
-        public FloatStateIdDrawer(IStateIdValidator stateIdValidator, object value) : base(value, stateIdValidator)
+        public FloatStateIdDrawer(object value) : base(value)
         {
 
         }
@@ -23,7 +23,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
             if (EditorGUI.EndChangeCheck())
             {
-                if (float.TryParse(value, out float result) && stateIdValidator.IsValid(result))
+                if (float.TryParse(value, out float result))
                     StateId = result;
                 else
                 {

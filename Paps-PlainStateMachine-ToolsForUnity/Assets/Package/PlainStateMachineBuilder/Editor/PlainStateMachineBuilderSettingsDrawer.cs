@@ -16,7 +16,6 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         public Type StateIdType { get; private set; }
 
         public event Action<Type> OnStateIdTypeChanged;
-        public event Action<PlainStateMachineBuilder> OnBuilderChanged;
 
         private GUIStyle _boxStyle;
         private GUIStyle _titleStyle;
@@ -90,7 +89,6 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             if (EditorGUI.EndChangeCheck())
             {
                 SetStateIdTypeByRepresentation();
-                OnStateIdTypeChanged?.Invoke(StateIdType);
             }
 
             GUILayout.EndArea();
@@ -98,6 +96,8 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private void SetStateIdTypeByRepresentation()
         {
+            var previousType = StateIdType;
+
             if (_stateIdRepresentation == Editor.StateIdType.Int)
                 StateIdType = typeof(int);
             else if (_stateIdRepresentation == Editor.StateIdType.Float)
@@ -108,12 +108,18 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             {
                 if (string.IsNullOrEmpty(_enumTypeFullName) == false)
                 {
-                    StateIdType = GetTypeOf(_enumTypeFullName);
+                    var enumType = GetTypeOf(_enumTypeFullName);
+
+                    if(enumType != null)
+                    {
+                        StateIdType = enumType;
+                    }
                 }
-                else
-                {
-                    StateIdType = null;
-                }
+            }
+
+            if(previousType != StateIdType)
+            {
+                OnStateIdTypeChanged?.Invoke(StateIdType);
             }
         }
 
@@ -133,13 +139,9 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         private void DrawBuilderField()
         {
             GUILayout.Label("Plain State Machine Builder", _labelStyle);
-            var preEventBuilderValue = (PlainStateMachineBuilder)EditorGUILayout.ObjectField(PlainStateMachineBuilder, typeof(ScriptableObject), false);
-
-            if(preEventBuilderValue != PlainStateMachineBuilder)
-            {
-                PlainStateMachineBuilder = preEventBuilderValue;
-                OnBuilderChanged?.Invoke(PlainStateMachineBuilder);
-            }
+            GUI.enabled = false;
+            EditorGUILayout.ObjectField(PlainStateMachineBuilder, typeof(PlainStateMachineBuilder), false);
+            GUI.enabled = true;
         }
 
         private void DrawControls()

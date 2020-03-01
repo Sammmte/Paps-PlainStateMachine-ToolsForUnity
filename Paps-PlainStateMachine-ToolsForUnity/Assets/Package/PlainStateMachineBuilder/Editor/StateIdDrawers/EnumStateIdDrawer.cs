@@ -12,7 +12,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private int _currentSelected;
 
-        public EnumStateIdDrawer(Type enumType, IStateIdValidator stateIdValidator, object value) : base(value, stateIdValidator)
+        public EnumStateIdDrawer(Type enumType, object value) : base(value)
         {
             _enumType = enumType;
 

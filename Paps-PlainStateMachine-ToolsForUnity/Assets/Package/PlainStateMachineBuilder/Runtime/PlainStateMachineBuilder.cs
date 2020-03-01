@@ -8,7 +8,6 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("Paps.PlainStateMachine_ToolsForUnity.Editor")]
 namespace Paps.PlainStateMachine_ToolsForUnity
 {
-    
     [CreateAssetMenu(menuName = "Paps/State Machine Builders/Plain State Machine Builder")]
     public class PlainStateMachineBuilder : ScriptableObject
     {
@@ -53,15 +52,15 @@ namespace Paps.PlainStateMachine_ToolsForUnity
         }
         
         [SerializeField]
-        [HideInInspector]
+        //[HideInInspector]
         private List<StateInfo> _states;
 
         [SerializeField]
-        [HideInInspector]
+        //[HideInInspector]
         private string _stateIdTypeFullName, _triggerTypeFullName;
 
         [SerializeField]
-        [HideInInspector]
+        //[HideInInspector]
         private List<Metadata> _metadata;
 
         private Type _stateIdType;
@@ -72,7 +71,13 @@ namespace Paps.PlainStateMachine_ToolsForUnity
             if (_states == null)
                 _states = new List<StateInfo>();
 
-            _states.Add(new StateInfo() { StateId = PlainStateMachineGenericTypeSerializer.Serialize(stateId), StateObject = stateObject });
+            if (StateIdType != stateId.GetType())
+                throw new InvalidOperationException("Cannot add state due to an invalid state id type");
+
+            if (ContainsState(stateId))
+                return;
+
+            _states.Add(new StateInfo() { SerializedStateId = PlainStateMachineGenericTypeSerializer.Serialize(stateId), StateObject = stateObject });
             OnChanged?.Invoke();
         }
 
@@ -94,7 +99,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity
 
                 for(int i = 0; i < _states.Count; i++)
                 {
-                    if (_states[i].StateId == stringStateId)
+                    if (_states[i].SerializedStateId == stringStateId)
                     {
                         _states.RemoveAt(i);
                         OnChanged?.Invoke();
@@ -104,12 +109,44 @@ namespace Paps.PlainStateMachine_ToolsForUnity
             }
         }
 
+        internal bool ContainsState(object stateId)
+        {
+            if(stateId != null)
+            {
+                try
+                {
+                    string serializedId = PlainStateMachineGenericTypeSerializer.Serialize(stateId);
+
+                    return ContainsState(serializedId);
+                }
+                catch(ArgumentException) { }
+            }
+
+            return false;
+        }
+
+        private bool ContainsState(string stateId)
+        {
+            for(int i = 0; i < _states.Count; i++)
+            {
+                if (_states[i].SerializedStateId == stateId)
+                    return true;
+            }
+
+            return false;
+        }
+
         internal StateInfo[] GetStates()
         {
             if (_states.Count > 0)
                 return _states.ToArray();
             else
                 return null;
+        }
+
+        internal void RemoveAllStates()
+        {
+            _states.Clear();
         }
 
         private Type GetTypeOf(string typeName)
@@ -131,7 +168,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity
 
             for(int i = 0; i < _states.Count; i++)
             {
-                TState stateId = (TState) PlainStateMachineGenericTypeSerializer.Deserialize(_states[i].StateId, typeof(TState));
+                TState stateId = (TState) PlainStateMachineGenericTypeSerializer.Deserialize(_states[i].SerializedStateId, typeof(TState));
                 IState stateObject = (IState)_states[i].StateObject;
 
                 stateMachine.AddState(stateId, stateObject);
@@ -143,7 +180,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity
         public object Build()
         {
             return GetType()
-                .GetMethod("Build", BindingFlags.NonPublic)
+                .GetMethod("Build", BindingFlags.Instance | BindingFlags.NonPublic)
                 .MakeGenericMethod(StateIdType, TriggerType)
                 .Invoke(this, null);
         }

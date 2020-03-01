@@ -5,14 +5,11 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
     public abstract class StateIdDrawer
     {
         public object StateId { get; protected set; }
-        protected IStateIdValidator stateIdValidator { get; private set; }
 
         public bool HasValue => StateId != null;
 
-        protected StateIdDrawer(object value, IStateIdValidator stateIdValidator)
+        protected StateIdDrawer(object value)
         {
-            this.stateIdValidator = stateIdValidator;
-
             if (value != null && IsValidType(value))
             {
                 StateId = value;

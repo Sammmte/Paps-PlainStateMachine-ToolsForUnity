@@ -13,11 +13,6 @@ MonoBehaviour:
   m_Name: Plain State Machine Builder
   m_EditorClassIdentifier: 
   _states: []
-  _stateIdParserMethodInfo:
-    TypeFullName: System.Int32
-    MethodName: Parse
-  _triggerParserMethodInfo:
-    TypeFullName: System.Int32
-    MethodName: Parse
-  _stateIdTypeFullName: System.Int32
+  _stateIdTypeFullName: System.String
   _triggerTypeFullName: System.Int32
+  _metadata: []

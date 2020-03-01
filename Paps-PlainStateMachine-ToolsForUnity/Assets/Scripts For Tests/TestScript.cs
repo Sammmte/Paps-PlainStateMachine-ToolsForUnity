@@ -1,10 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using System;
+﻿using Paps.PlainStateMachine_ToolsForUnity;
 using Paps.StateMachines;
-using Paps.PlainStateMachine_ToolsForUnity;
-using System.Reflection;
+using UnityEngine;
 
 namespace Tests
 {
@@ -13,12 +9,12 @@ namespace Tests
         [SerializeField]
         private PlainStateMachineBuilder _stateMachineBuilder;
 
-        [SerializeField]
-        private TestStateAsset _state1, _state2;
-
         public void Start()
         {
-            
+            PlainStateMachine<string, int> stateMachine = (PlainStateMachine<string, int>)_stateMachineBuilder.Build();
+
+            Debug.Log(stateMachine.ContainsState("hola"));
+            Debug.Log(stateMachine.ContainsState("loro"));
         }
     }
 
