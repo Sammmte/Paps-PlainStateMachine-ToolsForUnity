@@ -11,10 +11,16 @@ namespace Tests
 
         public void Start()
         {
-            PlainStateMachine<string, int> stateMachine = (PlainStateMachine<string, int>)_stateMachineBuilder.Build();
+            PlainStateMachine<int, int> stateMachine = (PlainStateMachine<int, int>)_stateMachineBuilder.Build();
 
-            Debug.Log(stateMachine.ContainsState("hola"));
-            Debug.Log(stateMachine.ContainsState("loro"));
+            var states = stateMachine.GetStates();
+
+            Debug.Log("State count: " + stateMachine.StateCount);
+
+            foreach(var state in states)
+            {
+                Debug.Log(state);
+            }
         }
     }
 

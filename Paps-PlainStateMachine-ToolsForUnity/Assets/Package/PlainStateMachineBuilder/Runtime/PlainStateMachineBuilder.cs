@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System;
 using Paps.StateMachines;
+using Paps.StateMachines.Extensions;
 using System.Reflection;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -113,24 +114,13 @@ namespace Paps.PlainStateMachine_ToolsForUnity
         {
             if(stateId != null)
             {
-                try
+                for (int i = 0; i < _states.Count; i++)
                 {
-                    string serializedId = PlainStateMachineGenericTypeSerializer.Serialize(stateId);
+                    object deserializedId = PlainStateMachineGenericTypeSerializer.Deserialize(_states[i].SerializedStateId, StateIdType);
 
-                    return ContainsState(serializedId);
+                    if (object.Equals(deserializedId, stateId))
+                        return true;
                 }
-                catch(ArgumentException) { }
-            }
-
-            return false;
-        }
-
-        private bool ContainsState(string stateId)
-        {
-            for(int i = 0; i < _states.Count; i++)
-            {
-                if (_states[i].SerializedStateId == stateId)
-                    return true;
             }
 
             return false;
@@ -169,7 +159,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity
             for(int i = 0; i < _states.Count; i++)
             {
                 TState stateId = (TState) PlainStateMachineGenericTypeSerializer.Deserialize(_states[i].SerializedStateId, typeof(TState));
-                IState stateObject = (IState)_states[i].StateObject;
+                IState stateObject = (_states[i].StateObject as IState) ?? new EmptyState();
 
                 stateMachine.AddState(stateId, stateObject);
             }

@@ -2,7 +2,6 @@
 using UnityEditor;
 using UnityEngine;
 using System;
-using System.Linq;
 
 namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
@@ -169,12 +168,32 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private void ReplaceStateId(StateNode node, object previousId, object newId)
         {
-            if(previousId != null)
+            if (previousId != null && ThereIsOtherNodeWithId(node, previousId) == false)
                 _builderSettingsDrawer.PlainStateMachineBuilder.RemoveState(previousId);
 
-            _builderSettingsDrawer.PlainStateMachineBuilder.AddState(newId, node.StateObject);
+            if (newId != null && _builderSettingsDrawer.PlainStateMachineBuilder.ContainsState(newId) == false)
+            {
+                _builderSettingsDrawer.PlainStateMachineBuilder.AddState(newId, node.StateObject);
+            }
 
             RebuildMetadata();
+        }
+
+        private bool ThereIsOtherNodeWithId(StateNode comparisonNode, object stateId)
+        {
+            for(int i = 0; i < _nodes.Count; i++)
+            {
+                var current = _nodes[i];
+
+                Debug.Log("EQUALITY");
+                Debug.Log(current.StateId);
+                Debug.Log(stateId);
+
+                if (current != comparisonNode && object.Equals(current.StateId, stateId))
+                    return true;
+            }
+
+            return false;
         }
 
         private void UpdatePositionMetadata(StateNode node, Vector2 position)
