@@ -137,6 +137,8 @@ namespace Paps.PlainStateMachine_ToolsForUnity
         internal void RemoveAllStates()
         {
             _states.Clear();
+
+            OnChanged?.Invoke();
         }
 
         private Type GetTypeOf(string typeName)

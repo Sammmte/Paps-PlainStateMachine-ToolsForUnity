@@ -42,36 +42,36 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             _nodeEventHandler = new StateNodeEventHandler(this);
             _metadata = new PlainStateMachineBuilderMetadata();
 
-            LoadBuilder(_builder);
+            LoadBuilder();
 
             _builderSettingsDrawer = new PlainStateMachineBuilderSettingsDrawer(_builder);
             _builderSettingsDrawer.OnStateIdTypeChanged += OnStateIdTypeChanged;
             _builderSettingsDrawer.OnTriggerTypeChanged += OnTriggerTypeChanged;
+
+            Undo.undoRedoPerformed += Reload;
         }
-
-
         
-        private void LoadBuilder(PlainStateMachineBuilder builder)
+        private void LoadBuilder()
         {
-            if (TryLoadFromBuilderData(builder) == false)
+            if (TryLoadFromBuilderData() == false)
             {
-                SetBuilderDefaults(builder);
+                SetBuilderDefaults();
             }
         }
 
-        private bool TryLoadFromBuilderData(PlainStateMachineBuilder builder)
+        private bool TryLoadFromBuilderData()
         {
-            if(builder.StateIdType != null)
+            if(_builder.StateIdType != null)
             {
-                var states = builder.GetStates();
+                var states = _builder.GetStates();
 
                 if (states != null)
                 {
-                    _metadata = builder.GetMetadata<PlainStateMachineBuilderMetadata>(MetadataKey);
+                    _metadata = _builder.GetMetadata<PlainStateMachineBuilderMetadata>(MetadataKey);
 
                     for (int i = 0; i < states.Length; i++)
                     {
-                        string serializedStateIdOfCurrent = builder.GetSerializedGenericTypeOf(states[i].SerializedStateId);
+                        string serializedStateIdOfCurrent = _builder.GetSerializedGenericTypeOf(states[i].SerializedStateId);
 
                         for (int j = 0; j < _metadata.StateNodesMetadata.Count; j++)
                         {
@@ -90,10 +90,12 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             return false;
         }
 
-        private void SetBuilderDefaults(PlainStateMachineBuilder builder)
+        private void SetBuilderDefaults()
         {
-            builder.StateIdType = DefaultStateIdType;
-            builder.TriggerType = DefaultTriggerType;
+            _builder.StateIdType = DefaultStateIdType;
+            _builder.TriggerType = DefaultTriggerType;
+
+            SetBuilderDirty();
         }
 
         private void OnGUI()
@@ -147,7 +149,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             var newNode = new StateNode(metadata.Position, _builder.StateIdType, stateInfo.StateObject, _builder.GetDeserializedGenericTypeOf(stateInfo.SerializedStateId, _builder.StateIdType));
             newNode.OnStateIdChanged += ReplaceStateId;
             newNode.OnStateObjectChanged += ReplaceStateObject;
-            newNode.OnPositionChanged += UpdatePositionMetadata;
+            newNode.OnPositionChanged += UpdateNodePositionMetadata;
             _nodes.Add(newNode);
         }
 
@@ -156,25 +158,31 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             var newNode = new StateNode(mousePosition, _builder.StateIdType, stateObject);
             newNode.OnStateIdChanged += ReplaceStateId;
             newNode.OnStateObjectChanged += ReplaceStateObject;
-            newNode.OnPositionChanged += UpdatePositionMetadata;
+            newNode.OnPositionChanged += UpdateNodePositionMetadata;
             _nodes.Add(newNode);
         }
 
         internal void RemoveNode(StateNode node)
         {
+            Undo.RecordObject(_builder, _builder.name);
+
             node.OnStateIdChanged -= ReplaceStateId;
             node.OnStateObjectChanged -= ReplaceStateObject;
-            node.OnPositionChanged -= UpdatePositionMetadata;
+            node.OnPositionChanged -= UpdateNodePositionMetadata;
             _nodes.Remove(node);
 
             if(node.StateId != null)
                 _builder.RemoveState(node.StateId);
 
             RebuildMetadata();
+
+            SetBuilderDirty();
         }
 
         private void ReplaceStateId(StateNode node, object previousId, object newId)
         {
+            Undo.RecordObject(_builder, _builder.name);
+
             if (previousId != null && ThereIsOtherNodeWithId(node, previousId) == false)
                 _builder.RemoveState(previousId);
 
@@ -184,6 +192,8 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             }
 
             RebuildMetadata();
+
+            SetBuilderDirty();
         }
 
         private bool ThereIsOtherNodeWithId(StateNode comparisonNode, object stateId)
@@ -199,17 +209,25 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             return false;
         }
 
-        private void UpdatePositionMetadata(StateNode node, Vector2 position)
+        private void UpdateNodePositionMetadata(StateNode node, Vector2 position)
         {
+            Undo.RecordObject(_builder, _builder.name);
+
             RebuildMetadata();
+
+            SetBuilderDirty();
         }
 
         private void ReplaceStateObject(StateNode node, ScriptableState previousObj, ScriptableState newObj)
         {
+            Undo.RecordObject(_builder, _builder.name);
+
             _builder.RemoveState(node.StateId);
             _builder.AddState(node.StateId, newObj);
 
             RebuildMetadata();
+
+            SetBuilderDirty();
         }
 
         private void RebuildMetadata()
@@ -249,6 +267,8 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private void OnStateIdTypeChanged(Type newType)
         {
+            Undo.RecordObject(_builder, _builder.name);
+
             _builder.RemoveAllStates();
 
             _builder.StateIdType = newType;
@@ -259,13 +279,19 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             }
 
             RebuildMetadata();
+
+            SetBuilderDirty();
         }
 
         private void OnTriggerTypeChanged(Type newType)
         {
+            Undo.RecordObject(_builder, _builder.name);
+
             _builder.TriggerType = newType;
 
             RebuildMetadata();
+
+            SetBuilderDirty();
         }
 
         private void ProcessWindowEvents(Event ev)
@@ -308,6 +334,20 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                 if (currentNode == node)
                     currentNode.Deselect();
             }
+        }
+
+        private void Reload()
+        {
+            Undo.undoRedoPerformed -= Reload;
+
+            Initialize(_builder);
+
+            SetBuilderDirty();
+        }
+
+        private void SetBuilderDirty()
+        {
+            EditorUtility.SetDirty(_builder);
         }
     }
 }
