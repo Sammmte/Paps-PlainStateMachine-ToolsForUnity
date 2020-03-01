@@ -1,6 +1,7 @@
 ﻿using Paps.PlainStateMachine_ToolsForUnity;
 using Paps.StateMachines;
 using UnityEngine;
+using SomeNamespace;
 
 namespace Tests
 {
@@ -11,7 +12,7 @@ namespace Tests
 
         public void Start()
         {
-            PlainStateMachine<int, int> stateMachine = (PlainStateMachine<int, int>)_stateMachineBuilder.Build();
+            PlainStateMachine<TestEnum, int> stateMachine = (PlainStateMachine<TestEnum, int>)_stateMachineBuilder.Build();
 
             var states = stateMachine.GetStates();
 

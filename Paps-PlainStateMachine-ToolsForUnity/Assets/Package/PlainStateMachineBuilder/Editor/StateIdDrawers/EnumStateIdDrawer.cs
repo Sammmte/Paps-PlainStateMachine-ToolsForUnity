@@ -16,8 +16,6 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         {
             _enumType = enumType;
 
-            Debug.Log(_enumType);
-
             SavePossibleValues(enumType);
         }
 

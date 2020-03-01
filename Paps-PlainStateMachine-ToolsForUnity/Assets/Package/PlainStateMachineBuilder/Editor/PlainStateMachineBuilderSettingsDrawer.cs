@@ -49,27 +49,31 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             _controlsAreaStyle = new GUIStyle();
             _controlsAreaStyle.padding = new RectOffset(20, 20, 20, 20);
 
-            if (builder != null)
-                _stateIdRepresentation = GetStateIdTypeByRawType(builder.StateIdType);
+            LoadStateIdTypeDataFrom(builder.StateIdType);
 
             SetStateIdTypeByRepresentation();
         }
 
-        private StateIdType GetStateIdTypeByRawType(Type type)
+        private void LoadStateIdTypeDataFrom(Type type)
         {
             if (type == null)
-                return DefaultStateIdType;
+                _stateIdRepresentation = DefaultStateIdType;
 
             if (type == typeof(int))
-                return Editor.StateIdType.Int;
+                _stateIdRepresentation = Editor.StateIdType.Int;
             else if (type == typeof(float))
-                return Editor.StateIdType.Float;
+                _stateIdRepresentation = Editor.StateIdType.Float;
             else if (type == typeof(string))
-                return Editor.StateIdType.String;
+                _stateIdRepresentation = Editor.StateIdType.String;
             else if (type.IsEnum)
-                return Editor.StateIdType.Enum;
-
-            return DefaultStateIdType;
+            {
+                _stateIdRepresentation = Editor.StateIdType.Enum;
+                _enumTypeFullName = type.FullName;
+            }
+            else
+            {
+                _stateIdRepresentation = DefaultStateIdType;
+            }
         }
 
         public void Draw(Rect windowRect)
