@@ -7,24 +7,29 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
     internal class PlainStateMachineBuilderSettingsDrawer
     {
-        private const StateIdType DefaultStateIdType = Editor.StateIdType.Int;
+        private const PlainStateMachineGenericType DefaultStateIdType = PlainStateMachineGenericType.Int;
+        private const PlainStateMachineGenericType DefaultTriggerType = PlainStateMachineGenericType.Int;
 
         private const float Width = 300, Height = 400, RightPadding = 10, TopPadding = 10;
 
-        private StateIdType _stateIdRepresentation { get; set; }
+        private PlainStateMachineGenericType _stateIdRepresentation { get; set; }
+        private PlainStateMachineGenericType _triggerRepresentation { get; set; }
 
         public Type StateIdType { get; private set; }
+        public Type TriggerType { get; private set; }
 
         public event Action<Type> OnStateIdTypeChanged;
+        public event Action<Type> OnTriggerTypeChanged;
 
         private GUIStyle _boxStyle;
         private GUIStyle _titleStyle;
         private GUIStyle _labelStyle;
         private GUIStyle _controlsAreaStyle;
 
-        private string _enumTypeFullName = "";
+        private string _stateIdEnumTypeFullName = "";
+        private string _triggerEnumTypeFullName = "";
 
-        public PlainStateMachineBuilder PlainStateMachineBuilder { get; private set; }
+        private PlainStateMachineBuilder PlainStateMachineBuilder { get; set; }
 
         public PlainStateMachineBuilderSettingsDrawer(PlainStateMachineBuilder builder = null)
         {
@@ -50,8 +55,10 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             _controlsAreaStyle.padding = new RectOffset(20, 20, 20, 20);
 
             LoadStateIdTypeDataFrom(builder.StateIdType);
+            LoadTriggerTypeDataFrom(builder.TriggerType);
 
             SetStateIdTypeByRepresentation();
+            SetTriggerTypeByRepresentation();
         }
 
         private void LoadStateIdTypeDataFrom(Type type)
@@ -60,19 +67,41 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                 _stateIdRepresentation = DefaultStateIdType;
 
             if (type == typeof(int))
-                _stateIdRepresentation = Editor.StateIdType.Int;
+                _stateIdRepresentation = PlainStateMachineGenericType.Int;
             else if (type == typeof(float))
-                _stateIdRepresentation = Editor.StateIdType.Float;
+                _stateIdRepresentation = PlainStateMachineGenericType.Float;
             else if (type == typeof(string))
-                _stateIdRepresentation = Editor.StateIdType.String;
+                _stateIdRepresentation = PlainStateMachineGenericType.String;
             else if (type.IsEnum)
             {
-                _stateIdRepresentation = Editor.StateIdType.Enum;
-                _enumTypeFullName = type.FullName;
+                _stateIdRepresentation = PlainStateMachineGenericType.Enum;
+                _stateIdEnumTypeFullName = type.FullName;
             }
             else
             {
                 _stateIdRepresentation = DefaultStateIdType;
+            }
+        }
+
+        private void LoadTriggerTypeDataFrom(Type type)
+        {
+            if (type == null)
+                _triggerRepresentation = DefaultTriggerType;
+
+            if (type == typeof(int))
+                _triggerRepresentation = PlainStateMachineGenericType.Int;
+            else if (type == typeof(float))
+                _triggerRepresentation = PlainStateMachineGenericType.Float;
+            else if (type == typeof(string))
+                _triggerRepresentation = PlainStateMachineGenericType.String;
+            else if (type.IsEnum)
+            {
+                _triggerRepresentation = PlainStateMachineGenericType.Enum;
+                _triggerEnumTypeFullName = type.FullName;
+            }
+            else
+            {
+                _triggerRepresentation = DefaultTriggerType;
             }
         }
 
@@ -93,6 +122,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             if (EditorGUI.EndChangeCheck())
             {
                 SetStateIdTypeByRepresentation();
+                SetTriggerTypeByRepresentation();
             }
 
             GUILayout.EndArea();
@@ -102,17 +132,17 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         {
             var previousType = StateIdType;
 
-            if (_stateIdRepresentation == Editor.StateIdType.Int)
+            if (_stateIdRepresentation == Editor.PlainStateMachineGenericType.Int)
                 StateIdType = typeof(int);
-            else if (_stateIdRepresentation == Editor.StateIdType.Float)
+            else if (_stateIdRepresentation == Editor.PlainStateMachineGenericType.Float)
                 StateIdType = typeof(float);
-            else if (_stateIdRepresentation == Editor.StateIdType.String)
+            else if (_stateIdRepresentation == Editor.PlainStateMachineGenericType.String)
                 StateIdType = typeof(string);
-            else if (_stateIdRepresentation == Editor.StateIdType.Enum)
+            else if (_stateIdRepresentation == Editor.PlainStateMachineGenericType.Enum)
             {
-                if (string.IsNullOrEmpty(_enumTypeFullName) == false)
+                if (string.IsNullOrEmpty(_stateIdEnumTypeFullName) == false)
                 {
-                    var enumType = GetTypeOf(_enumTypeFullName);
+                    var enumType = GetTypeOf(_stateIdEnumTypeFullName);
 
                     if(enumType != null)
                     {
@@ -124,6 +154,35 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             if(previousType != StateIdType)
             {
                 OnStateIdTypeChanged?.Invoke(StateIdType);
+            }
+        }
+
+        private void SetTriggerTypeByRepresentation()
+        {
+            var previousType = TriggerType;
+
+            if (_triggerRepresentation == Editor.PlainStateMachineGenericType.Int)
+                TriggerType = typeof(int);
+            else if (_triggerRepresentation == Editor.PlainStateMachineGenericType.Float)
+                TriggerType = typeof(float);
+            else if (_triggerRepresentation == Editor.PlainStateMachineGenericType.String)
+                TriggerType = typeof(string);
+            else if (_triggerRepresentation == Editor.PlainStateMachineGenericType.Enum)
+            {
+                if (string.IsNullOrEmpty(_triggerEnumTypeFullName) == false)
+                {
+                    var enumType = GetTypeOf(_triggerEnumTypeFullName);
+
+                    if (enumType != null)
+                    {
+                        TriggerType = enumType;
+                    }
+                }
+            }
+
+            if (previousType != TriggerType)
+            {
+                OnTriggerTypeChanged?.Invoke(TriggerType);
             }
         }
 
@@ -159,9 +218,15 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             if (PlainStateMachineBuilder != null)
             {
                 DrawStateIdRepresentationField();
-                if (_stateIdRepresentation == Editor.StateIdType.Enum)
+                if (_stateIdRepresentation == PlainStateMachineGenericType.Enum)
                 {
-                    DrawEnumTypeField();
+                    DrawEnumTypeFieldFor("State Id Enum Type Full Name", ref _stateIdEnumTypeFullName);
+                }
+
+                DrawTriggerRepresentationField();
+                if(_triggerRepresentation == PlainStateMachineGenericType.Enum)
+                {
+                    DrawEnumTypeFieldFor("Trigger Enum Type Full Name", ref _triggerEnumTypeFullName);
                 }
             }
             EditorGUILayout.EndVertical();
@@ -170,7 +235,13 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         private void DrawStateIdRepresentationField()
         {
             GUILayout.Label("State Id Type", _labelStyle);
-            _stateIdRepresentation = (StateIdType)EditorGUILayout.EnumPopup(_stateIdRepresentation);
+            _stateIdRepresentation = (PlainStateMachineGenericType)EditorGUILayout.EnumPopup(_stateIdRepresentation);
+        }
+
+        private void DrawTriggerRepresentationField()
+        {
+            GUILayout.Label("Trigger Type", _labelStyle);
+            _triggerRepresentation = (PlainStateMachineGenericType)EditorGUILayout.EnumPopup(_triggerRepresentation);
         }
 
         private void DrawTitle()
@@ -180,11 +251,11 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             GUILayout.EndVertical();
         }
 
-        private void DrawEnumTypeField()
+        private void DrawEnumTypeFieldFor(string title, ref string fullNameVariable)
         {
-            GUILayout.Label("Enum Type Full Name", _labelStyle);
+            GUILayout.Label(title, _labelStyle);
 
-            _enumTypeFullName = EditorGUILayout.TextField(_enumTypeFullName);
+            fullNameVariable = EditorGUILayout.TextField(fullNameVariable);
 
             EditorGUILayout.HelpBox("If the enum type is a nested type, the name would be like this:\nTheNamespace.TheClass+NestedEnum", MessageType.Info);
         }
