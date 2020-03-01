@@ -59,8 +59,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             _controlsAreaStyle = new GUIStyle();
             _controlsAreaStyle.padding = new RectOffset(ControlPaddingLeft, ControlPaddingRight, ControlPaddingTop, ControlPaddingBottom);
 
-            if(stateIdType != null)
-                _stateIdDrawer = StateIdDrawerFactory.Create(stateIdType, stateId);
+            _stateIdDrawer = StateIdDrawerFactory.Create(stateIdType, stateId);
 
             ShowAsNormal();
         }

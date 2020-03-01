@@ -144,7 +144,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private void AddNodeWith(StateInfo stateInfo, StateNodeMetadata metadata)
         {
-            var newNode = new StateNode(metadata.Position, stateInfo.SerializedStateId.GetType(), stateInfo.StateObject, stateInfo.SerializedStateId);
+            var newNode = new StateNode(metadata.Position, _builder.StateIdType, stateInfo.StateObject, _builder.GetDeserializedGenericTypeOf(stateInfo.SerializedStateId, _builder.StateIdType));
             newNode.OnStateIdChanged += ReplaceStateId;
             newNode.OnStateObjectChanged += ReplaceStateObject;
             newNode.OnPositionChanged += UpdatePositionMetadata;
@@ -153,7 +153,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         internal void AddNode(Vector2 mousePosition, ScriptableState stateObject = null)
         {
-            var newNode = new StateNode(mousePosition, _builderSettingsDrawer.StateIdType, stateObject);
+            var newNode = new StateNode(mousePosition, _builder.StateIdType, stateObject);
             newNode.OnStateIdChanged += ReplaceStateId;
             newNode.OnStateObjectChanged += ReplaceStateObject;
             newNode.OnPositionChanged += UpdatePositionMetadata;
@@ -191,10 +191,6 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             for(int i = 0; i < _nodes.Count; i++)
             {
                 var current = _nodes[i];
-
-                Debug.Log("EQUALITY");
-                Debug.Log(current.StateId);
-                Debug.Log(stateId);
 
                 if (current != comparisonNode && object.Equals(current.StateId, stateId))
                     return true;

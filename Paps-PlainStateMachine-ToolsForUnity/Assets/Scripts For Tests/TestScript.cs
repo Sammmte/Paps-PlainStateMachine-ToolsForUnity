@@ -2,6 +2,7 @@
 using Paps.StateMachines;
 using UnityEngine;
 using SomeNamespace;
+using System;
 
 namespace Tests
 {

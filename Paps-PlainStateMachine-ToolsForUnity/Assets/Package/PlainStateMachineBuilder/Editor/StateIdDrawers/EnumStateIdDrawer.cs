@@ -16,12 +16,13 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         {
             _enumType = enumType;
 
-            SavePossibleValues(enumType);
+            SavePossibleValues();
+            SetCurrentSelectedIfInitialValueIsNotNull(value);
         }
 
-        private void SavePossibleValues(Type enumType)
+        private void SavePossibleValues()
         {
-            var values = Enum.GetValues(enumType);
+            var values = Enum.GetValues(_enumType);
 
             _possibleValues = new string[values.Length + 1];
             _possibleValues[0] = "No Value";
@@ -32,6 +33,26 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             {
                 _possibleValues[index] = enumValue.ToString();
                 index++;
+            }
+        }
+
+        private void SetCurrentSelectedIfInitialValueIsNotNull(object value)
+        {
+            if(value != null)
+            {
+                var values = Enum.GetValues(_enumType);
+
+                int index = 1;
+                foreach(var enumValue in values)
+                {
+                    if (object.Equals(enumValue, value))
+                    {
+                        _currentSelected = index;
+                        return;
+                    }
+
+                    index++;
+                }
             }
         }
 
