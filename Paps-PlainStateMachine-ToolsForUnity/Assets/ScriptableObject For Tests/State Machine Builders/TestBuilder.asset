@@ -10,13 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 52feb79c99b521445899038aba144e4f, type: 3}
-  m_Name: Plain State Machine Builder
+  m_Name: TestBuilder
   m_EditorClassIdentifier: 
-  _states:
-  - SerializedStateId: 2
-    StateObject: {fileID: 0}
-  _stateIdTypeFullName: System.Int32
-  _triggerTypeFullName: SomeNamespace.TestEnum
-  _metadata:
-  - Key: PLAIN_STATE_MACHINE_BUILDER_METADATA
-    Value: '{"StateNodesMetadata":[{"Position":{"x":213.0,"y":180.0},"SerializedStateId":"2"}]}'
+  _states: []
+  _stateIdTypeFullName: SomeNamespace.TestEnum
+  _triggerTypeFullName: System.String
+  _metadata: []

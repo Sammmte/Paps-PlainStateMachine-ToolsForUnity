@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 
 namespace Paps.PlainStateMachine_ToolsForUnity
 {
-    public static class PlainStateMachineGenericTypeSerializer
+    internal static class PlainStateMachineGenericTypeSerializer
     {
         public static string Serialize(object value)
         {

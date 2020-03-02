@@ -71,11 +71,11 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
                     for (int i = 0; i < states.Length; i++)
                     {
-                        string serializedStateIdOfCurrent = _builder.GetSerializedGenericTypeOf(states[i].SerializedStateId);
+                        var current = states[i];
 
-                        for (int j = 0; j < _metadata.StateNodesMetadata.Count; j++)
+                        for(int j = 0; j < _metadata.StateNodesMetadata.Count; j++)
                         {
-                            if (_metadata.StateNodesMetadata[j].SerializedStateId == serializedStateIdOfCurrent)
+                            if(PlainStateMachineBuilderHelper.AreEquals(_metadata.StateNodesMetadata[j].StateId, current.StateId))
                             {
                                 AddNodeWith(states[i], _metadata.StateNodesMetadata[j]);
                                 break;
@@ -146,7 +146,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private void AddNodeWith(StateInfo stateInfo, StateNodeMetadata metadata)
         {
-            var newNode = new StateNode(metadata.Position, _builder.StateIdType, stateInfo.StateObject, _builder.GetDeserializedGenericTypeOf(stateInfo.SerializedStateId, _builder.StateIdType));
+            var newNode = new StateNode(metadata.Position, _builder.StateIdType, stateInfo.StateObject, stateInfo.StateId);
             newNode.OnStateIdChanged += ReplaceStateId;
             newNode.OnStateObjectChanged += ReplaceStateObject;
             newNode.OnPositionChanged += UpdateNodePositionMetadata;
@@ -242,12 +242,13 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
             for(int i = 0; i < states.Length; i++)
             {
-                StateNode currentStateNode = GetNodeOf(states[i]);
+                StateInfo currentState = states[i];
+                StateNode currentStateNode = GetNodeOf(currentState);
 
-                _metadata.StateNodesMetadata.Add(new StateNodeMetadata() { SerializedStateId = states[i].SerializedStateId, Position = currentStateNode.GetRect().position });
+                _metadata.StateNodesMetadata.Add(new StateNodeMetadata(currentState.StateId, currentStateNode.Position));
             }
 
-            _builder.SetMetadata(MetadataKey, _metadata);
+            _builder.SaveMetadata(MetadataKey, _metadata);
         }
 
         private StateNode GetNodeOf(StateInfo stateInfo)
@@ -256,9 +257,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             {
                 var current = _nodes[i];
 
-                var serializedId = _builder.GetSerializedGenericTypeOf(current.StateId);
-
-                if (serializedId == stateInfo.SerializedStateId)
+                if (PlainStateMachineBuilderHelper.AreEquals(current.StateId, stateInfo.StateId))
                     return current;
             }
 

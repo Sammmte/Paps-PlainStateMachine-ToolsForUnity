@@ -1,7 +1,6 @@
-﻿using UnityEngine;
-using Paps.StateMachines;
-using System;
+﻿using System;
 using UnityEditor;
+using UnityEngine;
 
 namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
@@ -48,7 +47,9 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private StateIdDrawer _stateIdDrawer;
 
-        public StateNode(Vector2 position,Type stateIdType = null, ScriptableState stateAsset = null, object stateId = null)
+        public Vector2 Position => _nodeRect.position;
+
+        public StateNode(Vector2 position, Type stateIdType = null, ScriptableState stateAsset = null, object stateId = null)
         {
             _nodeRect = new Rect(position.x, position.y, Width, Height);
             _nodeStyle = new GUIStyle();
@@ -151,29 +152,6 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         public void Deselect()
         {
             IsSelected = false;
-        }
-
-        private bool ClickedOver(Event mouseClickEvent)
-        {
-            if (mouseClickEvent.button == 0 && _nodeRect.Contains(mouseClickEvent.mousePosition))
-            {
-                if (_nodeRect.Contains(mouseClickEvent.mousePosition))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private bool IsDragging(Event ev)
-        {
-            if (ev.button == 0 && IsDragged)
-            {
-                return true;
-            }
-
-            return false;
         }
 
         public void ShowAsNormal()

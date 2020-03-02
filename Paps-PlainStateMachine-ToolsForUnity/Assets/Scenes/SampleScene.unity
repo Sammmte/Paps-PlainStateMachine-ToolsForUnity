@@ -160,10 +160,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 01d394bf0d103b0489b8a9a89d0d13a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _stateMachineBuilder: {fileID: 11400000, guid: a64cb26d165fb3541a997c06073d58bd,
+  _stateMachineBuilder: {fileID: 11400000, guid: cc16400ed53f62e4eb8807f70a71caf3,
     type: 2}
-  _state1: {fileID: 11400000, guid: 7d4a73259f4f9a94586af124b72fb2ba, type: 2}
-  _state2: {fileID: 11400000, guid: 5c9a54196cc5a134f8944d8c10e779f8, type: 2}
 --- !u!20 &519420031
 Camera:
   m_ObjectHideFlags: 0

@@ -13,7 +13,7 @@ namespace Tests
 
         public void Start()
         {
-            PlainStateMachine<TestEnum, TestEnum> stateMachine = (PlainStateMachine<TestEnum, TestEnum>)_stateMachineBuilder.Build();
+            var stateMachine = (PlainStateMachine<TestEnum, string>)_stateMachineBuilder.Build();
 
             var states = stateMachine.GetStates();
 
