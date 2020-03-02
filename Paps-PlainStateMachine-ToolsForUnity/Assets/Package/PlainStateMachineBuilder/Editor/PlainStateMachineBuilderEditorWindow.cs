@@ -7,19 +7,17 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
     public class PlainStateMachineBuilderEditorWindow : EditorWindow
     {
-        private List<StateNode> _nodes;
-
-        private BackgroundGridDrawer _gridDrawer;
-        private PlainStateMachineBuilderSettingsDrawer _builderSettingsDrawer;
-        private WindowEventHandler _windowEventHandler;
-        private StateNodeEventHandler _nodeEventHandler;
-
-        private PlainStateMachineBuilderMetadata _metadata;
         private const string MetadataKey = "PLAIN_STATE_MACHINE_BUILDER_METADATA";
 
         private static readonly Type DefaultStateIdType = typeof(int);
         private static readonly Type DefaultTriggerType = typeof(int);
 
+        private List<StateNode> _nodes;
+        private BackgroundGridDrawer _gridDrawer;
+        private PlainStateMachineBuilderSettingsDrawer _builderSettingsDrawer;
+        private WindowEventHandler _windowEventHandler;
+        private StateNodeEventHandler _nodeEventHandler;
+        private PlainStateMachineBuilderMetadata _metadata;
         private PlainStateMachineBuilder _builder;
 
         public static void OpenWindow(PlainStateMachineBuilder builder)
@@ -95,7 +93,9 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             _builder.StateIdType = DefaultStateIdType;
             _builder.TriggerType = DefaultTriggerType;
 
-            SetBuilderDirty();
+            EditorUtility.SetDirty(_builder);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
         }
 
         private void OnGUI()
@@ -164,36 +164,34 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         internal void RemoveNode(StateNode node)
         {
-            Undo.RecordObject(_builder, _builder.name);
+            DoWithUndoAndDirtyFlag(() =>
+            {
+                node.OnStateIdChanged -= ReplaceStateId;
+                node.OnStateObjectChanged -= ReplaceStateObject;
+                node.OnPositionChanged -= UpdateNodePositionMetadata;
+                _nodes.Remove(node);
 
-            node.OnStateIdChanged -= ReplaceStateId;
-            node.OnStateObjectChanged -= ReplaceStateObject;
-            node.OnPositionChanged -= UpdateNodePositionMetadata;
-            _nodes.Remove(node);
+                if (node.StateId != null)
+                    _builder.RemoveState(node.StateId);
 
-            if(node.StateId != null)
-                _builder.RemoveState(node.StateId);
-
-            RebuildMetadata();
-
-            SetBuilderDirty();
+                RebuildMetadata();
+            });
         }
 
         private void ReplaceStateId(StateNode node, object previousId, object newId)
         {
-            Undo.RecordObject(_builder, _builder.name);
-
-            if (previousId != null && ThereIsOtherNodeWithId(node, previousId) == false)
-                _builder.RemoveState(previousId);
-
-            if (newId != null && _builder.ContainsState(newId) == false)
+            DoWithUndoAndDirtyFlag(() =>
             {
-                _builder.AddState(newId, node.StateObject);
-            }
+                if (previousId != null && ThereIsOtherNodeWithId(node, previousId) == false)
+                    _builder.RemoveState(previousId);
 
-            RebuildMetadata();
+                if (newId != null && _builder.ContainsState(newId) == false)
+                {
+                    _builder.AddState(newId, node.StateObject);
+                }
 
-            SetBuilderDirty();
+                RebuildMetadata();
+            });
         }
 
         private bool ThereIsOtherNodeWithId(StateNode comparisonNode, object stateId)
@@ -211,23 +209,21 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private void UpdateNodePositionMetadata(StateNode node, Vector2 position)
         {
-            Undo.RecordObject(_builder, _builder.name);
-
-            RebuildMetadata();
-
-            SetBuilderDirty();
+            DoWithUndoAndDirtyFlag(() =>
+            {
+                RebuildMetadata();
+            });
         }
 
         private void ReplaceStateObject(StateNode node, ScriptableState previousObj, ScriptableState newObj)
         {
-            Undo.RecordObject(_builder, _builder.name);
+            DoWithUndoAndDirtyFlag(() =>
+            {
+                _builder.RemoveState(node.StateId);
+                _builder.AddState(node.StateId, newObj);
 
-            _builder.RemoveState(node.StateId);
-            _builder.AddState(node.StateId, newObj);
-
-            RebuildMetadata();
-
-            SetBuilderDirty();
+                RebuildMetadata();
+            });
         }
 
         private void RebuildMetadata()
@@ -266,31 +262,29 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private void OnStateIdTypeChanged(Type newType)
         {
-            Undo.RecordObject(_builder, _builder.name);
-
-            _builder.RemoveAllStates();
-
-            _builder.StateIdType = newType;
-
-            for(int i = 0; i < _nodes.Count; i++)
+            DoWithUndoAndDirtyFlag(() =>
             {
-                _nodes[i].SetNewStateIdType(newType);
-            }
+                _builder.RemoveAllStates();
 
-            RebuildMetadata();
+                _builder.StateIdType = newType;
 
-            SetBuilderDirty();
+                for (int i = 0; i < _nodes.Count; i++)
+                {
+                    _nodes[i].SetNewStateIdType(newType);
+                }
+
+                RebuildMetadata();
+            });
         }
 
         private void OnTriggerTypeChanged(Type newType)
         {
-            Undo.RecordObject(_builder, _builder.name);
+            DoWithUndoAndDirtyFlag(() =>
+            {
+                _builder.TriggerType = newType;
 
-            _builder.TriggerType = newType;
-
-            RebuildMetadata();
-
-            SetBuilderDirty();
+                RebuildMetadata();
+            });
         }
 
         private void ProcessWindowEvents(Event ev)
@@ -341,11 +335,14 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
             Initialize(_builder);
 
-            SetBuilderDirty();
+            EditorUtility.SetDirty(_builder);
+            Repaint();
         }
 
-        private void SetBuilderDirty()
+        private void DoWithUndoAndDirtyFlag(Action action)
         {
+            Undo.RecordObject(_builder, _builder.name);
+            action();
             EditorUtility.SetDirty(_builder);
         }
     }

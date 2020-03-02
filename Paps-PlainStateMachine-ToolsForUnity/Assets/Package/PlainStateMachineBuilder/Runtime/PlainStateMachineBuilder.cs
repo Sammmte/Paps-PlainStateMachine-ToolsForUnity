@@ -67,6 +67,15 @@ namespace Paps.PlainStateMachine_ToolsForUnity
         private Type _stateIdType;
         private Type _triggerType;
 
+        private void Awake()
+        {
+            if(_states == null)
+                _states = new List<StateInfo>();
+
+            if (_metadata == null)
+                _metadata = new List<Metadata>();
+        }
+
         internal void AddState(object stateId, ScriptableState stateObject)
         {
             if (StateIdType != stateId.GetType())
@@ -165,9 +174,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity
                 .Invoke(this, null);
         }
 
-        internal void SaveMetadata
-            
-            (string key, object value)
+        internal void SaveMetadata(string key, object value)
         {
             if (ContainsMetadataKey(key) == false)
                 _metadata.Add(new Metadata() { Key = key, Value = JsonUtility.ToJson(value) });

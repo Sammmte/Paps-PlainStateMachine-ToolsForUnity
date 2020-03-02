@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: TestBuilder
   m_EditorClassIdentifier: 
   _states: []
-  _stateIdTypeFullName: SomeNamespace.TestEnum
-  _triggerTypeFullName: System.String
+  _stateIdTypeFullName: System.Int32
+  _triggerTypeFullName: System.Int32
   _metadata: []
