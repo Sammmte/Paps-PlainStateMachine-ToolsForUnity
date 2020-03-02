@@ -10,7 +10,7 @@ using System.Runtime.CompilerServices;
 namespace Paps.PlainStateMachine_ToolsForUnity
 {
     [CreateAssetMenu(menuName = "Paps/State Machine Builders/Plain State Machine Builder")]
-    public class PlainStateMachineBuilder : ScriptableObject
+    public sealed class PlainStateMachineBuilder : ScriptableObject
     {
         internal event Action OnChanged;
 

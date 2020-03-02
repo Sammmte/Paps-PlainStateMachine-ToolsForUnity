@@ -3,7 +3,7 @@ using UnityEditor.Callbacks;
 
 namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
-    public class PlainStateMachineAssetDoubleClickHandler
+    internal class PlainStateMachineAssetDoubleClickHandler
     {
         [OnOpenAsset(1)]
         public static bool OpenEditorWindow(int instanceID, int line)

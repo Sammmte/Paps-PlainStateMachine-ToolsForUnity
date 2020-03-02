@@ -1,6 +1,6 @@
 ﻿namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
-    public enum PlainStateMachineGenericType
+    internal enum PlainStateMachineGenericType
     {
         Int,
         Float,

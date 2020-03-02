@@ -2,7 +2,7 @@
 
 namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
-    public static class StateIdDrawerFactory
+    internal static class StateIdDrawerFactory
     {
         private static readonly Type _intType = typeof(int);
         private static readonly Type _floatType = typeof(float);

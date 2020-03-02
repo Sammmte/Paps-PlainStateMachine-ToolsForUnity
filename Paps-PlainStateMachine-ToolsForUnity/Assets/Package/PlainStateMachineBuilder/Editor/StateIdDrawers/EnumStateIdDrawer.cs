@@ -4,7 +4,7 @@ using UnityEditor;
 
 namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
-    public class EnumStateIdDrawer : StateIdDrawer
+    internal class EnumStateIdDrawer : StateIdDrawer
     {
         private Type _enumType;
 

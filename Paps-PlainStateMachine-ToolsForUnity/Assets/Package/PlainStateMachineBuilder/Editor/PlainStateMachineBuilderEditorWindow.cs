@@ -5,7 +5,7 @@ using System;
 
 namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
-    public class PlainStateMachineBuilderEditorWindow : EditorWindow
+    internal class PlainStateMachineBuilderEditorWindow : EditorWindow
     {
         private const string MetadataKey = "PLAIN_STATE_MACHINE_BUILDER_METADATA";
 

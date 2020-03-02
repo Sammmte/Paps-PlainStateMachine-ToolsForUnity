@@ -3,7 +3,7 @@ using UnityEditor;
 
 namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
-    public class StringStateIdDrawer : StateIdDrawer
+    internal class StringStateIdDrawer : StateIdDrawer
     {
         public StringStateIdDrawer(object value) : base(value)
         {

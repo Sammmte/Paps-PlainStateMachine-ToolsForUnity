@@ -3,7 +3,7 @@ using UnityEditor;
 
 namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
-    public class FloatStateIdDrawer : StateIdDrawer
+    internal class FloatStateIdDrawer : StateIdDrawer
     {
         public FloatStateIdDrawer(object value) : base(value)
         {

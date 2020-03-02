@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
-    public class BackgroundGridDrawer
+    internal class BackgroundGridDrawer
     {
         private Vector2 _offset;
         private Vector2 _drag;

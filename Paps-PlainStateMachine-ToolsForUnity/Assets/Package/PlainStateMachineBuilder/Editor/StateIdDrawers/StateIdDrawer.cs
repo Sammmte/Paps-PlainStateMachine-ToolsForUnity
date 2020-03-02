@@ -2,7 +2,7 @@
 
 namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
-    public abstract class StateIdDrawer
+    internal abstract class StateIdDrawer
     {
         public object StateId { get; protected set; }
 
