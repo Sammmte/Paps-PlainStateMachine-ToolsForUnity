@@ -67,6 +67,12 @@ namespace Paps.PlainStateMachine_ToolsForUnity
         private Type _stateIdType;
         private Type _triggerType;
 
+        [SerializeField]
+        //[HideInInspector]
+        private string _serializedInitialStateId;
+
+        private object InitialStateId => PlainStateMachineGenericTypeSerializer.Deserialize(_serializedInitialStateId, StateIdType);
+
         private void Awake()
         {
             if(_states == null)
@@ -85,6 +91,10 @@ namespace Paps.PlainStateMachine_ToolsForUnity
                 return;
 
             _states.Add(new StateInfo(stateId, stateObject));
+
+            if (_states.Count == 1)
+                SetInitialState(stateId);
+
             OnChanged?.Invoke();
         }
 
@@ -101,6 +111,19 @@ namespace Paps.PlainStateMachine_ToolsForUnity
             return null;
         }
 
+        internal void SetInitialState(object stateId)
+        {
+            if(ContainsState(stateId))
+            {
+                _serializedInitialStateId = PlainStateMachineGenericTypeSerializer.Serialize(stateId);
+            }
+        }
+
+        internal object GetInitialStateId()
+        {
+            return InitialStateId;
+        }
+
         internal void RemoveState(object stateId)
         {
             if(ContainsState(stateId))
@@ -112,9 +135,21 @@ namespace Paps.PlainStateMachine_ToolsForUnity
                     if(PlainStateMachineBuilderHelper.AreEquals(stateId, current.StateId))
                     {
                         _states.RemoveAt(i);
+
+                        if (PlainStateMachineBuilderHelper.AreEquals(current.StateId, InitialStateId))
+                            SetInitialDefaultStateIfThereIsAny();
+
                         OnChanged?.Invoke();
                     }
                 }
+            }
+        }
+
+        private void SetInitialDefaultStateIfThereIsAny()
+        {
+            if(_states.Count > 0)
+            {
+                SetInitialState(_states[0].StateId);
             }
         }
 
@@ -153,14 +188,19 @@ namespace Paps.PlainStateMachine_ToolsForUnity
         {
             var stateMachine = new PlainStateMachine<TState, TTrigger>();
 
-            for(int i = 0; i < _states.Count; i++)
+            if(_states.Count > 0)
             {
-                var current = _states[i];
+                for (int i = 0; i < _states.Count; i++)
+                {
+                    var current = _states[i];
 
-                TState stateId = (TState)current.StateId;
-                IState stateObject = (current.StateObject as IState) ?? new EmptyState();
+                    TState stateId = (TState)current.StateId;
+                    IState stateObject = (current.StateObject as IState) ?? new EmptyState();
 
-                stateMachine.AddState(stateId, stateObject);
+                    stateMachine.AddState(stateId, stateObject);
+                }
+
+                stateMachine.InitialState = (TState)InitialStateId;
             }
 
             return stateMachine;

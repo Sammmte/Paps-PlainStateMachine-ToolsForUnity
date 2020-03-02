@@ -13,13 +13,15 @@ namespace Tests
 
         public void Start()
         {
-            var stateMachine = (PlainStateMachine<TestEnum, string>)_stateMachineBuilder.Build();
+            var stateMachine = (PlainStateMachine<int, int>)_stateMachineBuilder.Build();
 
             var states = stateMachine.GetStates();
 
             Debug.Log("State count: " + stateMachine.StateCount);
 
-            foreach(var state in states)
+            Debug.Log("Initial State: " + stateMachine.InitialState);
+
+            foreach (var state in states)
             {
                 Debug.Log(state);
             }

@@ -18,9 +18,6 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private static readonly Texture2D _selectedTexture = CreateBackgroundTexture(new Color(44f / 255f, 130f / 255f, 201f / 255f)); //blue
 
-        public bool IsDragged { get; private set; }
-        public bool IsSelected { get; private set; }
-
         public object StateId
         {
             get
@@ -33,8 +30,6 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         }
 
         public ScriptableState StateObject { get; private set; }
-
-        public Action<StateNode> OnSelected, OnDeselected;
 
         public Action<StateNode, object, object> OnStateIdChanged;
         public Action<StateNode, ScriptableState, ScriptableState> OnStateObjectChanged;
@@ -61,8 +56,6 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             _controlsAreaStyle.padding = new RectOffset(ControlPaddingLeft, ControlPaddingRight, ControlPaddingTop, ControlPaddingBottom);
 
             _stateIdDrawer = StateIdDrawerFactory.Create(stateIdType, stateId);
-
-            ShowAsNormal();
         }
 
         private static Texture2D CreateBackgroundTexture(Color color)
@@ -82,28 +75,28 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                 _stateIdDrawer = StateIdDrawerFactory.Create(stateIdType);
         }
 
-        public void ShowNullTypeDrawer()
-        {
-            EditorGUILayout.HelpBox("The state id type was not provided", MessageType.Warning);
-        }
-
         public void Drag(Vector2 delta)
         {
             _nodeRect.position += delta;
             OnPositionChanged?.Invoke(this, _nodeRect.position);
         }
 
-        public void Draw()
+        public void Draw(bool asSelected, bool asInitial)
         {
-            if(IsSelected)
-                DrawAsSelected();
+            if(asSelected)
+                DrawSelectedOutline();
+
+            if (asInitial)
+                AsInitial();
+            else
+                AsNormal();
 
             GUILayout.BeginArea(_nodeRect, _nodeStyle);
             DrawControls();
             GUILayout.EndArea();
         }
 
-        private void DrawAsSelected()
+        private void DrawSelectedOutline()
         {
             var selectedNodeRect = new Rect(
                 new Vector2(_nodeRect.position.x - SelectedHalfExtraPixels, _nodeRect.position.y - SelectedHalfExtraPixels),
@@ -138,28 +131,15 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private void DrawStateIdDrawer()
         {
-            if(_stateIdDrawer == null)
-                ShowNullTypeDrawer();
-            else
-                _stateIdDrawer.Draw();
+            _stateIdDrawer.Draw();
         }
 
-        public void Select()
-        {
-            IsSelected = true;
-        }
-
-        public void Deselect()
-        {
-            IsSelected = false;
-        }
-
-        public void ShowAsNormal()
+        public void AsNormal()
         {
             _nodeStyle.normal.background = _asNormal;
         }
 
-        public void ShowAsInitial()
+        public void AsInitial()
         {
             _nodeStyle.normal.background = _asInitial;
         }

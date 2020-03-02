@@ -20,6 +20,9 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         private PlainStateMachineBuilderMetadata _metadata;
         private PlainStateMachineBuilder _builder;
 
+        private StateNode _selectedNode;
+        private StateNode _initialNode;
+
         public static void OpenWindow(PlainStateMachineBuilder builder)
         {
             var window = GetWindow<PlainStateMachineBuilderEditorWindow>();
@@ -67,6 +70,8 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                 {
                     _metadata = _builder.GetMetadata<PlainStateMachineBuilderMetadata>(MetadataKey);
 
+                    var initialStateId = _builder.GetInitialStateId();
+
                     for (int i = 0; i < states.Length; i++)
                     {
                         var current = states[i];
@@ -80,6 +85,11 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                             }
                         }
                     }
+
+                    var initialNode = StateNodeOf(initialStateId);
+
+                    if (initialNode != null)
+                        SetInitialStateNode(initialNode);
                 }
 
                 return true;
@@ -126,12 +136,14 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             {
                 for (int i = _nodes.Count - 1; i >= 0; i--)
                 {
-                    _nodes[i].Draw();
+                    var current = _nodes[i];
+
+                    current.Draw(IsSelected(current), IsInitial(current));
                 }
             }
         }
 
-        internal void Drag(Vector2 delta)
+        public void Drag(Vector2 delta)
         {
             if (_nodes != null)
             {
@@ -144,25 +156,43 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             GUI.changed = true;
         }
 
+        private StateNode StateNodeOf(object stateId)
+        {
+            for(int i = 0; i < _nodes.Count; i++)
+            {
+                var current = _nodes[i];
+
+                if (PlainStateMachineBuilderHelper.AreEquals(current.StateId, stateId))
+                    return current;
+            }
+
+            return null;
+        }
+
         private void AddNodeWith(StateInfo stateInfo, StateNodeMetadata metadata)
         {
             var newNode = new StateNode(metadata.Position, _builder.StateIdType, stateInfo.StateObject, stateInfo.StateId);
-            newNode.OnStateIdChanged += ReplaceStateId;
-            newNode.OnStateObjectChanged += ReplaceStateObject;
-            newNode.OnPositionChanged += UpdateNodePositionMetadata;
-            _nodes.Add(newNode);
+            InternalAddNode(newNode);
         }
 
-        internal void AddNode(Vector2 mousePosition, ScriptableState stateObject = null)
+        public void AddNode(Vector2 mousePosition, ScriptableState stateObject = null)
         {
             var newNode = new StateNode(mousePosition, _builder.StateIdType, stateObject);
-            newNode.OnStateIdChanged += ReplaceStateId;
-            newNode.OnStateObjectChanged += ReplaceStateObject;
-            newNode.OnPositionChanged += UpdateNodePositionMetadata;
-            _nodes.Add(newNode);
+            InternalAddNode(newNode);
         }
 
-        internal void RemoveNode(StateNode node)
+        private void InternalAddNode(StateNode node)
+        {
+            node.OnStateIdChanged += ReplaceStateId;
+            node.OnStateObjectChanged += ReplaceStateObject;
+            node.OnPositionChanged += UpdateNodePositionMetadata;
+            _nodes.Add(node);
+
+            if (_nodes.Count == 1)
+                SetInitialStateNode(node);
+        }
+
+        public void RemoveNode(StateNode node)
         {
             DoWithUndoAndDirtyFlag(() =>
             {
@@ -173,6 +203,9 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
                 if (node.StateId != null)
                     _builder.RemoveState(node.StateId);
+
+                if (IsInitial(node))
+                    SetInitialStateNode(StateNodeOf(_builder.GetInitialStateId()));
 
                 RebuildMetadata();
             });
@@ -188,6 +221,8 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                 if (newId != null && _builder.ContainsState(newId) == false)
                 {
                     _builder.AddState(newId, node.StateObject);
+                    if (IsInitial(node))
+                        _builder.SetInitialState(newId);
                 }
 
                 RebuildMetadata();
@@ -305,28 +340,30 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             }
         }
 
-        internal void SelectNode(StateNode node)
+        public void SelectNode(StateNode node)
         {
             for (int i = 0; i < _nodes.Count; i++)
             {
                 var currentNode = _nodes[i];
 
                 if (currentNode == node)
-                    currentNode.Select();
-                else
-                    currentNode.Deselect();
+                    _selectedNode = currentNode;
             }
+
+            Repaint();
         }
 
-        internal void DeselectNode(StateNode node)
+        public void DeselectAll()
         {
-            for (int i = 0; i < _nodes.Count; i++)
-            {
-                var currentNode = _nodes[i];
+            _selectedNode = null;
 
-                if (currentNode == node)
-                    currentNode.Deselect();
-            }
+            Repaint();
+        }
+
+        public void SetInitialStateNode(StateNode node)
+        {
+            _initialNode = node;
+            _builder.SetInitialState(_initialNode.StateId);
         }
 
         private void Reload()
@@ -344,6 +381,16 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             Undo.RecordObject(_builder, _builder.name);
             action();
             EditorUtility.SetDirty(_builder);
+        }
+
+        public bool IsSelected(StateNode node)
+        {
+            return _selectedNode == node;
+        }
+
+        public bool IsInitial(StateNode node)
+        {
+            return _initialNode == node;
         }
     }
 }

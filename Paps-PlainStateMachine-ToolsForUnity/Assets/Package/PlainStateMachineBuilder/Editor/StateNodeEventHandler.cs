@@ -28,9 +28,9 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                             nodeEvent.Use();
                         }
                         else
-                            _window.DeselectNode(node);
+                            _window.DeselectAll();
                     }
-                    else if (IsRightMouseClick(nodeEvent.button) && node.IsSelected)
+                    else if (IsRightMouseClick(nodeEvent.button) && _window.IsSelected(node))
                     {
                         DisplayNodeOptionsAtPosition(node);
                         nodeEvent.Use();
@@ -40,7 +40,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                 
                 case EventType.MouseDrag:
 
-                    if (IsLeftMouseClick(nodeEvent.button) && node.IsSelected)
+                    if (IsLeftMouseClick(nodeEvent.button) && _window.IsSelected(node))
                     {
                         node.Drag(nodeEvent.delta);
                         nodeEvent.Use();
@@ -68,6 +68,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         private void DisplayNodeOptionsAtPosition(StateNode node)
         {
             GenericMenu genericMenu = new GenericMenu();
+            genericMenu.AddItem(new GUIContent("Set as initial state"), false, () => _window.SetInitialStateNode(node));
             genericMenu.AddItem(new GUIContent("Remove node"), false, () => _window.RemoveNode(node));
             genericMenu.ShowAsContext();
         }
