@@ -5,6 +5,11 @@ namespace Paps.PlainStateMachine_ToolsForUnity
 {
     public abstract class ScriptableState : ScriptableObject, IState
     {
+        [SerializeField]
+        private string _debugName;
+
+        public string DebugName => _debugName;
+
         protected object stateMachine { get; private set; }
 
         public void Initialize(object stateMachine)

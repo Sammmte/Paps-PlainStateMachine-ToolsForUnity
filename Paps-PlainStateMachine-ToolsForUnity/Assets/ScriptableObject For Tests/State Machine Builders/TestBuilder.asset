@@ -13,21 +13,15 @@ MonoBehaviour:
   m_Name: TestBuilder
   m_EditorClassIdentifier: 
   _states:
+  - _serializedStateId: 4
+    _stateObject: {fileID: 11400000, guid: 5c9a54196cc5a134f8944d8c10e779f8, type: 2}
+    _stateIdTypeFullName: System.Int32
   - _serializedStateId: 3
-    _stateObject: {fileID: 0}
-    _stateIdTypeFullName: System.Int32
-  - _serializedStateId: 2
-    _stateObject: {fileID: 0}
-    _stateIdTypeFullName: System.Int32
-  - _serializedStateId: 6
-    _stateObject: {fileID: 0}
-    _stateIdTypeFullName: System.Int32
-  - _serializedStateId: 5
-    _stateObject: {fileID: 0}
+    _stateObject: {fileID: 11400000, guid: 7d4a73259f4f9a94586af124b72fb2ba, type: 2}
     _stateIdTypeFullName: System.Int32
   _stateIdTypeFullName: System.Int32
   _triggerTypeFullName: System.Int32
   _metadata:
   - Key: PLAIN_STATE_MACHINE_BUILDER_METADATA
-    Value: '{"StateNodesMetadata":[{"_position":{"x":159.0,"y":140.0},"_serializedStateId":"3","_stateIdTypeFullName":"System.Int32"},{"_position":{"x":453.0,"y":126.0},"_serializedStateId":"2","_stateIdTypeFullName":"System.Int32"},{"_position":{"x":300.0,"y":462.0},"_serializedStateId":"6","_stateIdTypeFullName":"System.Int32"},{"_position":{"x":607.0,"y":351.0},"_serializedStateId":"5","_stateIdTypeFullName":"System.Int32"}]}'
-  _serializedInitialStateId: 5
+    Value: '{"StateNodesMetadata":[{"_position":{"x":573.0,"y":222.0},"_serializedStateId":"4","_stateIdTypeFullName":"System.Int32"},{"_position":{"x":334.0,"y":441.0},"_serializedStateId":"3","_stateIdTypeFullName":"System.Int32"}]}'
+  _serializedInitialStateId: 4

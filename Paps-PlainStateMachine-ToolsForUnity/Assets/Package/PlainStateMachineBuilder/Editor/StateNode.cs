@@ -39,6 +39,8 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         private GUIStyle _nodeStyle;
         private GUIStyle _selectedNodeStyle;
         private GUIStyle _controlsAreaStyle;
+        private GUIStyle _identityTitleStyle;
+        private GUIStyle _identityStateIdStyle;
 
         private StateIdDrawer _stateIdDrawer;
 
@@ -54,6 +56,18 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
             _controlsAreaStyle = new GUIStyle();
             _controlsAreaStyle.padding = new RectOffset(ControlPaddingLeft, ControlPaddingRight, ControlPaddingTop, ControlPaddingBottom);
+
+            _identityTitleStyle = new GUIStyle();
+            _identityTitleStyle.padding = new RectOffset(20, 20, 20, 20);
+            _identityTitleStyle.alignment = TextAnchor.MiddleCenter;
+            _identityTitleStyle.fontSize = 20;
+            _identityTitleStyle.wordWrap = true;
+
+            _identityStateIdStyle = new GUIStyle();
+            _identityStateIdStyle.padding = new RectOffset(20, 20, 20, 20);
+            _identityStateIdStyle.alignment = TextAnchor.MiddleCenter;
+            _identityStateIdStyle.fontSize = 16;
+            _identityStateIdStyle.wordWrap = true;
 
             _stateIdDrawer = StateIdDrawerFactory.Create(stateIdType, stateId);
         }
@@ -92,7 +106,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                 AsNormal();
 
             GUILayout.BeginArea(_nodeRect, _nodeStyle);
-            DrawControls();
+            DrawIdentity();
             GUILayout.EndArea();
         }
 
@@ -107,7 +121,25 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             GUILayout.EndArea();
         }
 
-        private void DrawControls()
+        private void DrawIdentity()
+        {
+            if (StateObject != null)
+            {
+                if(string.IsNullOrEmpty(StateObject.DebugName))
+                    GUILayout.Label("Nameless Object", _identityTitleStyle);
+                else
+                    GUILayout.Label(StateObject.DebugName, _identityTitleStyle);
+            }
+            else
+                GUILayout.Label("Empty State", _identityTitleStyle);
+
+            GUILayout.Space(20);
+
+            if (StateId != null)
+                GUILayout.Label("State Id: " + StateId.ToString(), _identityStateIdStyle);
+        }
+
+        public void DrawControls()
         {
             EditorGUILayout.BeginVertical(_controlsAreaStyle);
 

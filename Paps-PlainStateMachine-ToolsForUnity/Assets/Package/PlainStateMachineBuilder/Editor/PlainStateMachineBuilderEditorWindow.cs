@@ -19,6 +19,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         private StateNodeEventHandler _nodeEventHandler;
         private PlainStateMachineBuilderMetadata _metadata;
         private PlainStateMachineBuilder _builder;
+        private InspectorDrawer _inspectorDrawer;
 
         private StateNode _selectedNode;
         private StateNode _initialNode;
@@ -42,6 +43,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             _windowEventHandler = new WindowEventHandler(this);
             _nodeEventHandler = new StateNodeEventHandler(this);
             _metadata = new PlainStateMachineBuilderMetadata();
+            _inspectorDrawer = new InspectorDrawer();
 
             LoadBuilder();
 
@@ -114,10 +116,20 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             DrawNodes();
             DrawBuilderSettings();
 
+            if(HasSelectedNode())
+            {
+                DrawInspector(_selectedNode.DrawControls);
+            }
+
             ProcessNodeEvents(Event.current);
             ProcessWindowEvents(Event.current);
 
             if (GUI.changed) Repaint();
+        }
+
+        private void DrawInspector(Action drawSelectedElementControls)
+        {
+            _inspectorDrawer.Draw(position, drawSelectedElementControls);
         }
 
         private void DrawBackground()
@@ -391,6 +403,11 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         public bool IsInitial(StateNode node)
         {
             return _initialNode == node;
+        }
+
+        public bool HasSelectedNode()
+        {
+            return _selectedNode != null;
         }
     }
 }
