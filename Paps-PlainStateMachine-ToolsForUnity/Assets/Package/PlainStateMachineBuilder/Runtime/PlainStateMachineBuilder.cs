@@ -198,6 +198,9 @@ namespace Paps.PlainStateMachine_ToolsForUnity
                     IState stateObject = (current.StateObject as IState) ?? new EmptyState();
 
                     stateMachine.AddState(stateId, stateObject);
+                    
+                    if(stateObject is IStateEventHandler eventHandler)
+                        stateMachine.SubscribeEventHandlerTo(stateId, eventHandler);
                 }
 
                 stateMachine.InitialState = (TState)InitialStateId;

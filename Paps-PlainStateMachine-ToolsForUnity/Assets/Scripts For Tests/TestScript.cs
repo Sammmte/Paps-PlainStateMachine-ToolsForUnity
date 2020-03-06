@@ -24,6 +24,11 @@ namespace Tests
             foreach (var state in states)
             {
                 Debug.Log(state);
+
+                var eventHandlers = stateMachine.GetEventHandlersOf(state);
+                
+                if(eventHandlers != null)
+                    Debug.Log("State " + state + " contains " + eventHandlers.Length + " event handlers");
             }
         }
     }

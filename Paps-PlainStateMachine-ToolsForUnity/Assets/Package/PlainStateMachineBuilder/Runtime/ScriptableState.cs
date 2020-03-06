@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Paps.PlainStateMachine_ToolsForUnity
 {
-    public abstract class ScriptableState : ScriptableObject, IState
+    public abstract class ScriptableState : ScriptableObject, IState, IStateEventHandler
     {
         [SerializeField]
         private string _debugName;
@@ -46,6 +46,11 @@ namespace Paps.PlainStateMachine_ToolsForUnity
         protected virtual void OnUpdate()
         {
 
+        }
+
+        public virtual bool HandleEvent(IEvent ev)
+        {
+            return false;
         }
     }
 }
