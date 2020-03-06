@@ -359,7 +359,11 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                 var currentNode = _nodes[i];
 
                 if (currentNode == node)
+                {
+                    GUI.FocusControl(null);
                     _selectedNode = currentNode;
+                }
+                    
             }
 
             Repaint();
