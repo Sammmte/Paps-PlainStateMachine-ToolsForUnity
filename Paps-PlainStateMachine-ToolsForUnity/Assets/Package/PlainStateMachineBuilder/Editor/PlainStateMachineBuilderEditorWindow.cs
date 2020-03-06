@@ -2,6 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 using System;
+using System.Linq;
 
 namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
@@ -23,7 +24,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private StateNode _selectedNode;
         private StateNode _initialNode;
-
+        
         public static void OpenWindow(PlainStateMachineBuilder builder)
         {
             var window = GetWindow<PlainStateMachineBuilderEditorWindow>();

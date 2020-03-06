@@ -45,6 +45,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         private StateIdDrawer _stateIdDrawer;
 
         public Vector2 Position => _nodeRect.position;
+        public Vector2 Center => _nodeRect.center;
 
         public StateNode(Vector2 position, Type stateIdType = null, ScriptableState stateAsset = null, object stateId = null)
         {
