@@ -3,9 +3,9 @@ using UnityEditor;
 
 namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
-    internal class IntStateIdDrawer : StateIdDrawer
+    internal class IntDrawer : PlainStateMachineGenericTypeDrawer
     {
-        public IntStateIdDrawer(object value) : base(value)
+        public IntDrawer(object value) : base(value)
         {
 
         }
@@ -14,9 +14,9 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         {
             EditorGUI.BeginChangeCheck();
 
-            string value = StateId != null ? StateId.ToString() : "";
+            string value = Value != null ? Value.ToString() : "";
 
-            if (StateId == null)
+            if (Value == null)
                 value = EditorGUILayout.TextField(value);
             else
                 value = EditorGUILayout.TextField(value);
@@ -24,7 +24,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             if (EditorGUI.EndChangeCheck())
             {
                 if (int.TryParse(value, out int result))
-                    StateId = result;
+                    Value = result;
                 else
                 {
                     if(string.IsNullOrEmpty(value) == false)
@@ -32,7 +32,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                         Debug.LogWarning("Value " + value + " is not an Integer");
                     }
                     
-                    StateId = null;
+                    Value = null;
                 }
             }
         }

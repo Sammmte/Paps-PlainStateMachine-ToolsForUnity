@@ -22,13 +22,19 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
                     if (IsLeftMouseClick(nodeEvent.button))
                     {
-                        if (IsPointerOverNode(nodeEvent.mousePosition, node))
+                        if (node.IsPointOverNode(nodeEvent.mousePosition))
                         {
+                            if (_window.HasTransitionPreview())
+                            {
+                                _window.AddTransition(_window.GetSourceNodeFromTransitionPreview(), node);
+                                _window.EndTransitionPreview();
+                            }
+
                             _window.SelectNode(node);
                             nodeEvent.Use();
                         }
                         else
-                            _window.DeselectAll();
+                            _window.DeselectAllNodes();
                     }
                     else if (IsRightMouseClick(nodeEvent.button) && _window.IsSelected(node))
                     {
@@ -49,11 +55,6 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                     break;
             }
         }
-
-        private bool IsPointerOverNode(Vector2 pointerPosition, StateNode node)
-        {
-            return node.GetRect().Contains(pointerPosition);
-        }
         
         private bool IsLeftMouseClick(int button)
         {
@@ -69,6 +70,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         {
             GenericMenu genericMenu = new GenericMenu();
             genericMenu.AddItem(new GUIContent("Set as initial state"), false, () => _window.SetInitialStateNode(node));
+            genericMenu.AddItem(new GUIContent("Add transition"), false, () => _window.BeginTransitionPreviewFrom(node));
             genericMenu.AddItem(new GUIContent("Remove node"), false, () => _window.RemoveNode(node));
             genericMenu.ShowAsContext();
         }

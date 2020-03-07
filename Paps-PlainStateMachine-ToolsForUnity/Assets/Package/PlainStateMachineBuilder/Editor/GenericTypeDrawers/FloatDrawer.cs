@@ -3,9 +3,9 @@ using UnityEditor;
 
 namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
-    internal class StringStateIdDrawer : StateIdDrawer
+    internal class FloatDrawer : PlainStateMachineGenericTypeDrawer
     {
-        public StringStateIdDrawer(object value) : base(value)
+        public FloatDrawer(object value) : base(value)
         {
 
         }
@@ -14,28 +14,32 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         {
             EditorGUI.BeginChangeCheck();
 
-            string value = StateId != null ? StateId.ToString() : "";
+            string value = Value != null ? Value.ToString() : "";
 
-            if (StateId == null)
+            if (Value == null)
                 value = EditorGUILayout.TextField(value);
             else
                 value = EditorGUILayout.TextField(value);
 
             if (EditorGUI.EndChangeCheck())
             {
-                if (string.IsNullOrEmpty(value) == false)
-                    StateId = value;
+                if (float.TryParse(value, out float result))
+                    Value = result;
                 else
                 {
-                    Debug.LogWarning("String field cannot be empty");
-                    StateId = null;
+                    if(string.IsNullOrEmpty(value) == false)
+                    {
+                        Debug.LogWarning("Value " + value + " is not a Float");
+                    }
+
+                    Value = null;
                 }
             }
         }
 
         protected override bool IsValidType(object value)
         {
-            return value.GetType() == typeof(string);
+            return value.GetType() == typeof(float);
         }
     }
 }

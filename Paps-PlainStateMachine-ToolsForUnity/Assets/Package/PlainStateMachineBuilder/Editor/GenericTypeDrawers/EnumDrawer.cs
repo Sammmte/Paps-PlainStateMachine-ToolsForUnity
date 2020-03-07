@@ -4,7 +4,7 @@ using UnityEditor;
 
 namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
-    internal class EnumStateIdDrawer : StateIdDrawer
+    internal class EnumDrawer : PlainStateMachineGenericTypeDrawer
     {
         private Type _enumType;
 
@@ -12,7 +12,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private int _currentSelected;
 
-        public EnumStateIdDrawer(Type enumType, object value) : base(value)
+        public EnumDrawer(Type enumType, object value) : base(value)
         {
             _enumType = enumType;
 
@@ -65,10 +65,10 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             if (EditorGUI.EndChangeCheck())
             {
                 if (_currentSelected != 0)
-                    StateId = Enum.Parse(_enumType, _possibleValues[_currentSelected]);
+                    Value = Enum.Parse(_enumType, _possibleValues[_currentSelected]);
                 else
                 {
-                    StateId = null;
+                    Value = null;
                 }
             }
         }

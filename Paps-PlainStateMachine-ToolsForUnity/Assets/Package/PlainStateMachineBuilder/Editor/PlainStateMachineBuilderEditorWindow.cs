@@ -14,17 +14,23 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         private static readonly Type DefaultTriggerType = typeof(int);
 
         private List<StateNode> _nodes;
+        private List<TransitionConnection> _transitions;
         private BackgroundGridDrawer _gridDrawer;
         private PlainStateMachineBuilderSettingsDrawer _builderSettingsDrawer;
         private WindowEventHandler _windowEventHandler;
         private StateNodeEventHandler _nodeEventHandler;
+        private TransitionConnectionEventHandler _transitionConnectionEventHandler;
         private PlainStateMachineBuilderMetadata _metadata;
         private PlainStateMachineBuilder _builder;
         private InspectorDrawer _inspectorDrawer;
 
         private StateNode _selectedNode;
         private StateNode _initialNode;
-        
+
+        private TransitionConnection _selectedTransition;
+
+        private TransitionConnectionPreview _transitionPreview;
+
         public static void OpenWindow(PlainStateMachineBuilder builder)
         {
             var window = GetWindow<PlainStateMachineBuilderEditorWindow>();
@@ -39,10 +45,12 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             titleContent = new GUIContent("Plain State Machine Builder Window");
 
             _nodes = new List<StateNode>();
+            _transitions = new List<TransitionConnection>();
 
             _gridDrawer = new BackgroundGridDrawer();
             _windowEventHandler = new WindowEventHandler(this);
             _nodeEventHandler = new StateNodeEventHandler(this);
+            _transitionConnectionEventHandler = new TransitionConnectionEventHandler(this);
             _metadata = new PlainStateMachineBuilderMetadata();
             _inspectorDrawer = new InspectorDrawer();
 
@@ -54,7 +62,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
             Undo.undoRedoPerformed += Reload;
         }
-        
+
         private void LoadBuilder()
         {
             if (TryLoadFromBuilderData() == false)
@@ -65,7 +73,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private bool TryLoadFromBuilderData()
         {
-            if(_builder.StateIdType != null)
+            if (_builder.StateIdType != null)
             {
                 var states = _builder.GetStates();
 
@@ -79,9 +87,9 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                     {
                         var current = states[i];
 
-                        for(int j = 0; j < _metadata.StateNodesMetadata.Count; j++)
+                        for (int j = 0; j < _metadata.StateNodesMetadata.Count; j++)
                         {
-                            if(PlainStateMachineBuilderHelper.AreEquals(_metadata.StateNodesMetadata[j].StateId, current.StateId))
+                            if (PlainStateMachineBuilderHelper.AreEquals(_metadata.StateNodesMetadata[j].StateId, current.StateId))
                             {
                                 AddNodeWith(states[i], _metadata.StateNodesMetadata[j]);
                                 break;
@@ -114,18 +122,31 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         private void OnGUI()
         {
             DrawBackground();
+            DrawTransitions();
+            DrawTransitionPreview();
             DrawNodes();
             DrawBuilderSettings();
 
-            if(HasSelectedNode())
-            {
+            if (HasSelectedNode())
                 DrawInspector(_selectedNode.DrawControls);
-            }
+
+            if (HasSelectedTransition())
+                DrawInspector(_selectedTransition.DrawControls);
 
             ProcessNodeEvents(Event.current);
+            ProcessTransitionEvents(Event.current);
             ProcessWindowEvents(Event.current);
 
             if (GUI.changed) Repaint();
+        }
+
+        private void DrawTransitionPreview()
+        {
+            if (_transitionPreview != null)
+            {
+                _transitionPreview.Draw(Event.current.mousePosition);
+                GUI.changed = true;
+            }
         }
 
         private void DrawInspector(Action drawSelectedElementControls)
@@ -156,6 +177,19 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             }
         }
 
+        private void DrawTransitions()
+        {
+            if (_transitions.Count > 0)
+            {
+                for (int i = 0; i < _transitions.Count; i++)
+                {
+                    var current = _transitions[i];
+
+                    current.Draw(IsSelected(current));
+                }
+            }
+        }
+
         public void Drag(Vector2 delta)
         {
             if (_nodes != null)
@@ -171,7 +205,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private StateNode StateNodeOf(object stateId)
         {
-            for(int i = 0; i < _nodes.Count; i++)
+            for (int i = 0; i < _nodes.Count; i++)
             {
                 var current = _nodes[i];
 
@@ -205,6 +239,13 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                 SetInitialStateNode(node);
         }
 
+        public void AddTransition(StateNode source, StateNode target)
+        {
+            var newTransition = new TransitionConnection(source, target, _builder.TriggerType);
+
+            _transitions.Add(newTransition);
+        }
+
         public void RemoveNode(StateNode node)
         {
             DoWithUndoAndDirtyFlag(() =>
@@ -222,6 +263,11 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
                 RebuildMetadata();
             });
+        }
+
+        public void RemoveTransition(TransitionConnection transition)
+        {
+            _transitions.Remove(transition);
         }
 
         private void ReplaceStateId(StateNode node, object previousId, object newId)
@@ -244,7 +290,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private bool ThereIsOtherNodeWithId(StateNode comparisonNode, object stateId)
         {
-            for(int i = 0; i < _nodes.Count; i++)
+            for (int i = 0; i < _nodes.Count; i++)
             {
                 var current = _nodes[i];
 
@@ -284,7 +330,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
             if (states == null) return;
 
-            for(int i = 0; i < states.Length; i++)
+            for (int i = 0; i < states.Length; i++)
             {
                 StateInfo currentState = states[i];
                 StateNode currentStateNode = GetNodeOf(currentState);
@@ -297,7 +343,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private StateNode GetNodeOf(StateInfo stateInfo)
         {
-            for(int i = 0; i < _nodes.Count; i++)
+            for (int i = 0; i < _nodes.Count; i++)
             {
                 var current = _nodes[i];
 
@@ -331,6 +377,11 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             {
                 _builder.TriggerType = newType;
 
+                for(int i = 0; i < _transitions.Count; i++)
+                {
+                    _transitions[i].SetNewTriggerType(newType);
+                }
+
                 RebuildMetadata();
             });
         }
@@ -347,8 +398,21 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                 for (int i = _nodes.Count - 1; i >= 0; i--)
                 {
                     var currentNode = _nodes[i];
-                    
+
                     _nodeEventHandler.HandleEventFor(currentNode, e);
+                }
+            }
+        }
+
+        private void ProcessTransitionEvents(Event e)
+        {
+            if(_transitions.Count > 0)
+            {
+                for(int i = 0; i < _transitions.Count; i++)
+                {
+                    var current = _transitions[i];
+
+                    _transitionConnectionEventHandler.HandleEventFor(current, e);
                 }
             }
         }
@@ -364,15 +428,38 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                     GUI.FocusControl(null);
                     _selectedNode = currentNode;
                 }
-                    
+
             }
 
             Repaint();
         }
 
-        public void DeselectAll()
+        public void DeselectAllNodes()
         {
             _selectedNode = null;
+
+            Repaint();
+        }
+
+        public void SelectTransition(TransitionConnection transition)
+        {
+            for (int i = 0; i < _transitions.Count; i++)
+            {
+                var currentTransition = _transitions[i];
+
+                if (currentTransition == transition)
+                {
+                    GUI.FocusControl(null);
+                    _selectedTransition = currentTransition;
+                }
+            }
+
+            Repaint();
+        }
+
+        public void DeselectAllTransitions()
+        {
+            _selectedTransition = null;
 
             Repaint();
         }
@@ -405,6 +492,11 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             return _selectedNode == node;
         }
 
+        public bool IsSelected(TransitionConnection transition)
+        {
+            return _selectedTransition == transition;
+        }
+
         public bool IsInitial(StateNode node)
         {
             return _initialNode == node;
@@ -413,6 +505,34 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         public bool HasSelectedNode()
         {
             return _selectedNode != null;
+        }
+
+        public bool HasSelectedTransition()
+        {
+            return _selectedTransition != null;
+        }
+
+        public void BeginTransitionPreviewFrom(StateNode source)
+        {
+            _transitionPreview = new TransitionConnectionPreview(source);
+        }
+
+        public void EndTransitionPreview()
+        {
+            _transitionPreview = null;
+        }
+
+        public bool HasTransitionPreview()
+        {
+            return _transitionPreview != null;
+        }
+
+        public StateNode GetSourceNodeFromTransitionPreview()
+        {
+            if (HasTransitionPreview())
+                return _transitionPreview.Source;
+            else 
+                return null;
         }
     }
 }

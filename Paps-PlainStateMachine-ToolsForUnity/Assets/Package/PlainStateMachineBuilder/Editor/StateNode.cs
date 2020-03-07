@@ -25,7 +25,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                 if (_stateIdDrawer == null)
                     return null;
                 else
-                    return _stateIdDrawer.StateId;
+                    return _stateIdDrawer.Value;
             }
         }
 
@@ -42,12 +42,12 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         private GUIStyle _identityTitleStyle;
         private GUIStyle _identityStateIdStyle;
 
-        private StateIdDrawer _stateIdDrawer;
+        private PlainStateMachineGenericTypeDrawer _stateIdDrawer;
 
         public Vector2 Position => _nodeRect.position;
         public Vector2 Center => _nodeRect.center;
 
-        public StateNode(Vector2 position, Type stateIdType = null, ScriptableState stateAsset = null, object stateId = null)
+        public StateNode(Vector2 position, Type stateIdType, ScriptableState stateAsset = null, object stateId = null)
         {
             _nodeRect = new Rect(position.x, position.y, Width, Height);
             _nodeStyle = new GUIStyle();
@@ -70,7 +70,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             _identityStateIdStyle.fontSize = 16;
             _identityStateIdStyle.wordWrap = true;
 
-            _stateIdDrawer = StateIdDrawerFactory.Create(stateIdType, stateId);
+            _stateIdDrawer = PlainStateMachineGenericTypeDrawerFactory.Create(stateIdType, stateId);
         }
 
         private static Texture2D CreateBackgroundTexture(Color color)
@@ -87,7 +87,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             if (stateIdType == null)
                 _stateIdDrawer = null;
             else
-                _stateIdDrawer = StateIdDrawerFactory.Create(stateIdType);
+                _stateIdDrawer = PlainStateMachineGenericTypeDrawerFactory.Create(stateIdType);
         }
 
         public void Drag(Vector2 delta)
@@ -146,12 +146,12 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
             var previousStateId = StateId;
             DrawStateIdDrawer();
-            if (previousStateId != StateId) OnStateIdChanged(this, previousStateId, StateId);
+            if (previousStateId != StateId) OnStateIdChanged?.Invoke(this, previousStateId, StateId);
 
             EditorGUI.BeginChangeCheck();
             var previousStateObject = StateObject;
             DrawStateAssetField();
-            if (EditorGUI.EndChangeCheck()) OnStateObjectChanged(this, previousStateObject, StateObject);
+            if (EditorGUI.EndChangeCheck()) OnStateObjectChanged?.Invoke(this, previousStateObject, StateObject);
 
             EditorGUILayout.EndVertical();
         }
@@ -164,7 +164,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private void DrawStateIdDrawer()
         {
-            _stateIdDrawer.Draw();
+            _stateIdDrawer.Draw("State Id");
         }
 
         public void AsNormal()
@@ -180,6 +180,11 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         public Rect GetRect()
         {
             return _nodeRect;
+        }
+
+        public bool IsPointOverNode(Vector2 point)
+        {
+            return _nodeRect.Contains(point);
         }
     }
 }

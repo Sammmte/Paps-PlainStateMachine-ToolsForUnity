@@ -2,31 +2,31 @@
 
 namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
-    internal static class StateIdDrawerFactory
+    internal static class PlainStateMachineGenericTypeDrawerFactory
     {
         private static readonly Type _intType = typeof(int);
         private static readonly Type _floatType = typeof(float);
         private static readonly Type _stringType = typeof(string);
 
-        public static StateIdDrawer Create(Type stateIdType, object beginValue = null)
+        public static PlainStateMachineGenericTypeDrawer Create(Type stateIdType, object beginValue = null)
         {
             if(stateIdType != null)
             {
                 if (stateIdType == _intType)
                 {
-                    return new IntStateIdDrawer(beginValue);
+                    return new IntDrawer(beginValue);
                 }
                 else if (stateIdType == _floatType)
                 {
-                    return new FloatStateIdDrawer(beginValue);
+                    return new FloatDrawer(beginValue);
                 }
                 else if (stateIdType == _stringType)
                 {
-                    return new StringStateIdDrawer(beginValue);
+                    return new StringDrawer(beginValue);
                 }
                 else if (stateIdType.IsEnum)
                 {
-                    return new EnumStateIdDrawer(stateIdType, beginValue);
+                    return new EnumDrawer(stateIdType, beginValue);
                 }
             }
 
