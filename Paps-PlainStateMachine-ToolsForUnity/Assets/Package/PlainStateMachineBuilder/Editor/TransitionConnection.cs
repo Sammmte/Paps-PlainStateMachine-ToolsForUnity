@@ -15,8 +15,6 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         public Vector3 StartPoint => _source.Center;
         public Vector3 EndPoint => _target.Center;
-        public Vector3 StartTangent => StartPoint + Vector3.left * 50f;
-        public Vector3 EndTangent => EndPoint - Vector3.left * 50f;
         public object Trigger => _triggerDrawer.Value;
         public ScriptableGuardCondition[] GuardConditions { get; private set; }
         public Action<TransitionConnection, object, object> OnTriggerChanged;
@@ -48,7 +46,10 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         public void Draw(bool asSelected)
         {
-            Handles.DrawBezier(StartPoint, EndPoint, StartTangent, EndTangent, Color.yellow, null, Width);
+            var previousColor = Handles.color;
+            Handles.color = Color.yellow;
+            Handles.DrawAAPolyLine(Width,StartPoint, EndPoint);
+            Handles.color = previousColor;
         }
 
         public void DrawControls()
@@ -78,7 +79,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         public bool IsPointOverConnection(Vector2 point)
         {
-            return HandleUtility.DistancePointBezier(point, StartPoint, EndPoint, StartTangent, EndTangent) <= ClickableExtraRange;
+            return HandleUtility.DistancePointLine(point, StartPoint, EndPoint) <= ClickableExtraRange;
         }
 
         public ScriptableGuardCondition[] ArrayField(string label, ref bool open, ScriptableGuardCondition[] array)

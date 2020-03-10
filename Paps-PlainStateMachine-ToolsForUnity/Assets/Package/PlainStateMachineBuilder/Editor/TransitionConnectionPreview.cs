@@ -10,8 +10,6 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         public StateNode Source { get; private set; }
 
         private Vector3 StartPoint => Source.Center;
-        private Vector3 StartTangent => StartPoint + Vector3.left * 50f;
-
 
         public TransitionConnectionPreview(StateNode source)
         {
@@ -20,12 +18,10 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         public void Draw(Vector2 currentEndPoint)
         {
-            Handles.DrawBezier(StartPoint, currentEndPoint, StartTangent, GetEndTangent(currentEndPoint), Color.yellow, null, Width);
-        }
-
-        private Vector3 GetEndTangent(Vector2 endPoint)
-        {
-            return endPoint - Vector2.left * 50f;
+            var previousColor = Handles.color;
+            Handles.color = Color.yellow;
+            Handles.DrawAAPolyLine(Width, StartPoint, currentEndPoint);
+            Handles.color = previousColor;
         }
     }
 }
