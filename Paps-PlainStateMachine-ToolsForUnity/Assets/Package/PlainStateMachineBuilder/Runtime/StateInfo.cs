@@ -45,7 +45,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity
 
         public ScriptableState StateObject => _stateObject;
 
-        internal StateInfo(object stateId, ScriptableState stateObject)
+        public StateInfo(object stateId, ScriptableState stateObject)
         {
             _serializedStateId = PlainStateMachineGenericTypeSerializer.Serialize(stateId);
 

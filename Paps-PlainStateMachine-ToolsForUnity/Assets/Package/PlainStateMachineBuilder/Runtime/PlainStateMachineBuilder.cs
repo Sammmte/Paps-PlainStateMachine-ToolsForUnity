@@ -12,8 +12,6 @@ namespace Paps.PlainStateMachine_ToolsForUnity
     [CreateAssetMenu(menuName = "Paps/State Machine Builders/Plain State Machine Builder")]
     public sealed class PlainStateMachineBuilder : ScriptableObject
     {
-        internal event Action OnChanged;
-
         internal Type StateIdType
         {
             get
@@ -28,8 +26,6 @@ namespace Paps.PlainStateMachine_ToolsForUnity
             {
                 _stateIdType = value;
                 _stateIdTypeFullName = _stateIdType.FullName;
-                
-                OnChanged?.Invoke();
             }
         }
 
@@ -47,14 +43,15 @@ namespace Paps.PlainStateMachine_ToolsForUnity
             {
                 _triggerType = value;
                 _triggerTypeFullName = _triggerType.FullName;
-                
-                OnChanged?.Invoke();
             }
         }
         
         [SerializeField]
         //[HideInInspector]
         private List<StateInfo> _states;
+
+        [SerializeField] 
+        private List<TransitionInfo> _transitions;
 
         [SerializeField]
         //[HideInInspector]
@@ -77,6 +74,9 @@ namespace Paps.PlainStateMachine_ToolsForUnity
         {
             if(_states == null)
                 _states = new List<StateInfo>();
+            
+            if(_transitions == null)
+                _transitions = new List<TransitionInfo>();
 
             if (_metadata == null)
                 _metadata = new List<Metadata>();
@@ -85,7 +85,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity
         internal void AddState(object stateId, ScriptableState stateObject)
         {
             if (StateIdType != stateId.GetType())
-                throw new InvalidOperationException("Cannot add state due to an invalid state id type");
+                return;
 
             if (ContainsState(stateId))
                 return;
@@ -94,8 +94,6 @@ namespace Paps.PlainStateMachine_ToolsForUnity
 
             if (_states.Count == 1)
                 SetInitialState(stateId);
-
-            OnChanged?.Invoke();
         }
 
         internal StateInfo StateInfoOf(object stateId)
@@ -138,8 +136,6 @@ namespace Paps.PlainStateMachine_ToolsForUnity
 
                         if (PlainStateMachineBuilderHelper.AreEquals(current.StateId, InitialStateId))
                             SetInitialDefaultStateIfThereIsAny();
-
-                        OnChanged?.Invoke();
                     }
                 }
             }
@@ -180,33 +176,111 @@ namespace Paps.PlainStateMachine_ToolsForUnity
         internal void RemoveAllStates()
         {
             _states.Clear();
+        }
 
-            OnChanged?.Invoke();
+        internal void AddTransition(object StateFrom, object Trigger, object StateTo, ScriptableGuardCondition[] guardConditions)
+        {
+            if (StateIdType != StateFrom.GetType() ||
+                StateIdType != StateTo.GetType() ||
+                TriggerType != Trigger.GetType())
+                return;
+            
+            var newTransition = new TransitionInfo(StateFrom, Trigger, StateTo, guardConditions);
+            
+            if(ContainsTransition(newTransition))
+                return;
+            
+            _transitions.Add(newTransition);
+        }
+
+        internal void RemoveTransition(TransitionInfo transitionInfo)
+        {
+            _transitions.Remove(transitionInfo);
+        }
+
+        internal TransitionInfo[] GetTransitions()
+        {
+            if (_transitions.Count > 0)
+                return _transitions.ToArray();
+            else
+                return null;
+        }
+
+        internal bool ContainsTransition(TransitionInfo transition)
+        {
+            for (int i = 0; i < _transitions.Count; i++)
+            {
+                var current = _transitions[i];
+
+                if (PlainStateMachineBuilderHelper.AreEquals(current.StateFrom, transition.StateFrom) &&
+                    PlainStateMachineBuilderHelper.AreEquals(current.Trigger, transition.Trigger) &&
+                    PlainStateMachineBuilderHelper.AreEquals(current.StateTo, transition.StateTo))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        internal void RemoveAllTransitions()
+        {
+            _transitions.Clear();
         }
 
         private PlainStateMachine<TState, TTrigger> Build<TState, TTrigger>()
         {
             var stateMachine = new PlainStateMachine<TState, TTrigger>();
 
-            if(_states.Count > 0)
+            AddStates(stateMachine);
+            AddTransitionsAndGuardConditions(stateMachine);
+
+            return stateMachine;
+        }
+
+        private void AddStates<TState, TTrigger>(PlainStateMachine<TState, TTrigger> stateMachine)
+        {
+            if (_states.Count > 0)
             {
                 for (int i = 0; i < _states.Count; i++)
                 {
                     var current = _states[i];
 
-                    TState stateId = (TState)current.StateId;
+                    TState stateId = (TState) current.StateId;
                     IState stateObject = (current.StateObject as IState) ?? new EmptyState();
 
                     stateMachine.AddState(stateId, stateObject);
-                    
-                    if(stateObject is IStateEventHandler eventHandler)
+
+                    if (stateObject is IStateEventHandler eventHandler)
                         stateMachine.SubscribeEventHandlerTo(stateId, eventHandler);
                 }
 
-                stateMachine.InitialState = (TState)InitialStateId;
+                stateMachine.InitialState = (TState) InitialStateId;
             }
+        }
 
-            return stateMachine;
+        private void AddTransitionsAndGuardConditions<TState, TTrigger>(PlainStateMachine<TState, TTrigger> stateMachine)
+        {
+            if (_transitions.Count > 0)
+            {
+                for (int i = 0; i < _transitions.Count; i++)
+                {
+                    var current = _transitions[i];
+
+                    TState stateFrom = (TState) current.StateFrom;
+                    TState stateTo = (TState) current.StateTo;
+                    TTrigger trigger = (TTrigger) current.Trigger;
+
+                    var transition = new Transition<TState, TTrigger>(stateFrom, trigger, stateTo);
+                    
+                    stateMachine.AddTransition(transition);
+
+                    for (int j = 0; j < current.GuardConditions.Length; j++)
+                    {
+                        stateMachine.AddGuardConditionTo(transition, current.GuardConditions[j]);
+                    }
+                }
+            }
         }
 
         public object Build()

@@ -12,6 +12,10 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private readonly StateNode _source;
         private readonly StateNode _target;
+        
+        private bool _guardConditionsArrayOpened;
+        private GUIStyle _controlsAreaStyle;
+        private PlainStateMachineGenericTypeDrawer _triggerDrawer;
 
         public Vector3 StartPoint => _source.Center;
         public Vector3 EndPoint => _target.Center;
@@ -20,9 +24,11 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         public Action<TransitionConnection, object, object> OnTriggerChanged;
         public Action<TransitionConnection, ScriptableGuardCondition[]> OnGuardConditionsChanged;
 
-        private bool _guardConditionsArrayOpened;
-        private GUIStyle _controlsAreaStyle;
-        private PlainStateMachineGenericTypeDrawer _triggerDrawer;
+        public StateNode Source => _source;
+        public StateNode Target => _target;
+
+        public object StateFrom => Source.StateId;
+        public object StateTo => Target.StateId;
 
         public TransitionConnection(StateNode source, StateNode target, Type triggerType, object trigger = null, ScriptableGuardCondition[] guardConditions = null)
         {

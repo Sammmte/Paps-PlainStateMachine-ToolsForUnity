@@ -75,38 +75,56 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         {
             if (_builder.StateIdType != null)
             {
-                var states = _builder.GetStates();
-
-                if (states != null)
-                {
-                    _metadata = _builder.GetMetadata<PlainStateMachineBuilderMetadata>(MetadataKey);
-
-                    var initialStateId = _builder.GetInitialStateId();
-
-                    for (int i = 0; i < states.Length; i++)
-                    {
-                        var current = states[i];
-
-                        for (int j = 0; j < _metadata.StateNodesMetadata.Count; j++)
-                        {
-                            if (PlainStateMachineBuilderHelper.AreEquals(_metadata.StateNodesMetadata[j].StateId, current.StateId))
-                            {
-                                AddNodeWith(states[i], _metadata.StateNodesMetadata[j]);
-                                break;
-                            }
-                        }
-                    }
-
-                    var initialNode = StateNodeOf(initialStateId);
-
-                    if (initialNode != null)
-                        SetInitialStateNode(initialNode);
-                }
+                LoadStates();
 
                 return true;
             }
 
             return false;
+        }
+
+        private void LoadStates()
+        {
+            var states = _builder.GetStates();
+
+            if (states != null)
+            {
+                _metadata = _builder.GetMetadata<PlainStateMachineBuilderMetadata>(MetadataKey);
+
+                var initialStateId = _builder.GetInitialStateId();
+
+                for (int i = 0; i < states.Length; i++)
+                {
+                    var current = states[i];
+
+                    for (int j = 0; j < _metadata.StateNodesMetadata.Count; j++)
+                    {
+                        if (PlainStateMachineBuilderHelper.AreEquals(_metadata.StateNodesMetadata[j].StateId, current.StateId))
+                        {
+                            AddNodeFrom(states[i], _metadata.StateNodesMetadata[j]);
+                            break;
+                        }
+                    }
+                }
+
+                var initialNode = StateNodeOf(initialStateId);
+
+                if (initialNode != null)
+                    SetInitialStateNode(initialNode);
+            }
+        }
+
+        private void LoadTransitions()
+        {
+            var transitions = _builder.GetTransitions();
+
+            if (transitions != null)
+            {
+                for (int i = 0; i < transitions.Length; i++)
+                {
+                    AddTransitionFrom(transitions[i]);
+                }
+            }
         }
 
         private void SetBuilderDefaults()
@@ -216,7 +234,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             return null;
         }
 
-        private void AddNodeWith(StateInfo stateInfo, StateNodeMetadata metadata)
+        private void AddNodeFrom(StateInfo stateInfo, StateNodeMetadata metadata)
         {
             var newNode = new StateNode(metadata.Position, _builder.StateIdType, stateInfo.StateObject, stateInfo.StateId);
             InternalAddNode(newNode);
@@ -230,9 +248,10 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private void InternalAddNode(StateNode node)
         {
-            node.OnStateIdChanged += ReplaceStateId;
-            node.OnStateObjectChanged += ReplaceStateObject;
+            node.OnStateIdChanged += (changedNode, previousId, currentId) => Rebuild();
+            node.OnStateObjectChanged += (changedNode, previousStateObj, currentStateObj) => Rebuild();
             node.OnPositionChanged += UpdateNodePositionMetadata;
+            
             _nodes.Add(node);
 
             if (_nodes.Count == 1)
@@ -241,81 +260,65 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         public void AddTransition(StateNode source, StateNode target)
         {
+            if(ContainsTransitionWithSourceAndTarget(source, target))
+                return;
+            
             var newTransition = new TransitionConnection(source, target, _builder.TriggerType);
+
+            newTransition.OnTriggerChanged += (connection, previousTrigger, currentTrigger) => Rebuild();
+            newTransition.OnGuardConditionsChanged += (connection, currentGuardConditions) => Rebuild();
 
             _transitions.Add(newTransition);
         }
 
-        public void RemoveNode(StateNode node)
+        public void AddTransitionFrom(TransitionInfo transitionInfo)
         {
-            DoWithUndoAndDirtyFlag(() =>
-            {
-                node.OnStateIdChanged -= ReplaceStateId;
-                node.OnStateObjectChanged -= ReplaceStateObject;
-                node.OnPositionChanged -= UpdateNodePositionMetadata;
-                _nodes.Remove(node);
+            var source = StateNodeOf(transitionInfo.StateFrom);
+            var target = StateNodeOf(transitionInfo.StateTo);
+            
+            var newTransition = new TransitionConnection(source, target, _builder.TriggerType, transitionInfo.Trigger, transitionInfo.GuardConditions);
 
-                if (node.StateId != null)
-                    _builder.RemoveState(node.StateId);
-
-                if (IsInitial(node))
-                    SetInitialStateNode(StateNodeOf(_builder.GetInitialStateId()));
-
-                RebuildMetadata();
-            });
+            newTransition.OnTriggerChanged += (connection, previousTrigger, currentTrigger) => Rebuild();
+            newTransition.OnGuardConditionsChanged += (connection, currentGuardConditions) => Rebuild();
+            
+            _transitions.Add(newTransition);
         }
 
-        public void RemoveTransition(TransitionConnection transition)
+        private bool ContainsTransitionWithSourceAndTarget(StateNode source, StateNode target)
         {
-            _transitions.Remove(transition);
-        }
-
-        private void ReplaceStateId(StateNode node, object previousId, object newId)
-        {
-            DoWithUndoAndDirtyFlag(() =>
+            for (int i = 0; i < _transitions.Count; i++)
             {
-                if (previousId != null && ThereIsOtherNodeWithId(node, previousId) == false)
-                    _builder.RemoveState(previousId);
-
-                if (newId != null && _builder.ContainsState(newId) == false)
-                {
-                    _builder.AddState(newId, node.StateObject);
-                    if (IsInitial(node))
-                        _builder.SetInitialState(newId);
-                }
-
-                RebuildMetadata();
-            });
-        }
-
-        private bool ThereIsOtherNodeWithId(StateNode comparisonNode, object stateId)
-        {
-            for (int i = 0; i < _nodes.Count; i++)
-            {
-                var current = _nodes[i];
-
-                if (current != comparisonNode && object.Equals(current.StateId, stateId))
+                if (_transitions[i].Source == source && _transitions[i].Target == target)
                     return true;
             }
 
             return false;
         }
 
+        public void RemoveNode(StateNode node)
+        {
+            DoWithUndoAndDirtyFlag(() =>
+            {
+                _nodes.Remove(node);
+
+                Rebuild();
+            });
+        }
+
+        public void RemoveTransition(TransitionConnection transition)
+        {
+            DoWithUndoAndDirtyFlag(() =>
+            {
+                _transitions.Remove(transition);
+                
+                Rebuild();
+            });
+        }
+
         private void UpdateNodePositionMetadata(StateNode node, Vector2 position)
         {
             DoWithUndoAndDirtyFlag(() =>
             {
-                RebuildMetadata();
-            });
-        }
-
-        private void ReplaceStateObject(StateNode node, ScriptableState previousObj, ScriptableState newObj)
-        {
-            DoWithUndoAndDirtyFlag(() =>
-            {
-                _builder.RemoveState(node.StateId);
-                _builder.AddState(node.StateId, newObj);
-
                 RebuildMetadata();
             });
         }
@@ -533,6 +536,40 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                 return _transitionPreview.Source;
             else 
                 return null;
+        }
+
+        private void Rebuild()
+        {
+            ClearBuilder();
+            RebuildStates();
+            RebuildTransitions();
+            RebuildMetadata();
+        }
+        
+        private void ClearBuilder()
+        {
+            _builder.RemoveAllTransitions();
+            _builder.RemoveAllStates();
+        }
+
+        private void RebuildStates()
+        {
+            for (int i = 0; i < _nodes.Count; i++)
+            {
+                _builder.AddState(_nodes[i].StateId, _nodes[i].StateObject);
+                
+                if(IsInitial(_nodes[i]))
+                    SetInitialStateNode(_nodes[i]);
+            }
+        }
+
+        private void RebuildTransitions()
+        {
+            for (int i = 0; i < _transitions.Count; i++)
+            {
+                _builder.AddTransition(_transitions[i].StateFrom, _transitions[i].Trigger, _transitions[i].StateTo,
+                    _transitions[i].GuardConditions);
+            }
         }
     }
 }
