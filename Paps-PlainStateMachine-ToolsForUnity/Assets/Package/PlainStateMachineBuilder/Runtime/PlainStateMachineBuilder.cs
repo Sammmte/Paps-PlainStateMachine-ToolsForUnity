@@ -26,6 +26,8 @@ namespace Paps.PlainStateMachine_ToolsForUnity
             {
                 _stateIdType = value;
                 _stateIdTypeFullName = _stateIdType.FullName;
+                RemoveAllTransitions();
+                RemoveAllStates();
             }
         }
 
@@ -43,6 +45,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity
             {
                 _triggerType = value;
                 _triggerTypeFullName = _triggerType.FullName;
+                RemoveAllTransitions();
             }
         }
         
@@ -68,7 +71,16 @@ namespace Paps.PlainStateMachine_ToolsForUnity
         //[HideInInspector]
         private string _serializedInitialStateId;
 
-        private object InitialStateId => PlainStateMachineGenericTypeSerializer.Deserialize(_serializedInitialStateId, StateIdType);
+        private object InitialStateId
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_serializedInitialStateId) == false)
+                    return PlainStateMachineGenericTypeSerializer.Deserialize(_serializedInitialStateId, StateIdType);
+                else
+                    return null;
+            }
+        }
 
         private void Awake()
         {
@@ -84,6 +96,9 @@ namespace Paps.PlainStateMachine_ToolsForUnity
 
         internal void AddState(object stateId, ScriptableState stateObject)
         {
+            if(stateId == null)
+                return;
+            
             if (StateIdType != stateId.GetType())
                 return;
 
@@ -143,10 +158,10 @@ namespace Paps.PlainStateMachine_ToolsForUnity
 
         private void SetInitialDefaultStateIfThereIsAny()
         {
-            if(_states.Count > 0)
-            {
+            if (_states.Count > 0)
                 SetInitialState(_states[0].StateId);
-            }
+            else
+                _serializedInitialStateId = "";
         }
 
         internal bool ContainsState(object stateId)
@@ -176,19 +191,26 @@ namespace Paps.PlainStateMachine_ToolsForUnity
         internal void RemoveAllStates()
         {
             _states.Clear();
+            SetInitialDefaultStateIfThereIsAny();
         }
 
         internal void AddTransition(object StateFrom, object Trigger, object StateTo, ScriptableGuardCondition[] guardConditions)
         {
+            if(StateFrom == null || Trigger == null || StateTo == null)
+                return;
+
             if (StateIdType != StateFrom.GetType() ||
                 StateIdType != StateTo.GetType() ||
                 TriggerType != Trigger.GetType())
                 return;
             
-            var newTransition = new TransitionInfo(StateFrom, Trigger, StateTo, guardConditions);
-            
-            if(ContainsTransition(newTransition))
+            if(ContainsState(StateFrom) == false || ContainsState(StateTo) == false)
                 return;
+            
+            if(ContainsTransition(StateFrom, Trigger, StateTo))
+                return;
+            
+            var newTransition = new TransitionInfo(StateFrom, Trigger, StateTo, guardConditions);
             
             _transitions.Add(newTransition);
         }
@@ -215,6 +237,23 @@ namespace Paps.PlainStateMachine_ToolsForUnity
                 if (PlainStateMachineBuilderHelper.AreEquals(current.StateFrom, transition.StateFrom) &&
                     PlainStateMachineBuilderHelper.AreEquals(current.Trigger, transition.Trigger) &&
                     PlainStateMachineBuilderHelper.AreEquals(current.StateTo, transition.StateTo))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        internal bool ContainsTransition(object StateFrom, object Trigger, object StateTo)
+        {
+            for (int i = 0; i < _transitions.Count; i++)
+            {
+                var current = _transitions[i];
+
+                if (PlainStateMachineBuilderHelper.AreEquals(current.StateFrom, StateFrom) &&
+                    PlainStateMachineBuilderHelper.AreEquals(current.Trigger, Trigger) &&
+                    PlainStateMachineBuilderHelper.AreEquals(current.StateTo, StateTo))
                 {
                     return true;
                 }
@@ -277,7 +316,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity
 
                     for (int j = 0; j < current.GuardConditions.Length; j++)
                     {
-                        stateMachine.AddGuardConditionTo(transition, current.GuardConditions[j]);
+                        stateMachine.AddGuardConditionTo(transition, ScriptableObject.Instantiate(current.GuardConditions[j]));
                     }
                 }
             }

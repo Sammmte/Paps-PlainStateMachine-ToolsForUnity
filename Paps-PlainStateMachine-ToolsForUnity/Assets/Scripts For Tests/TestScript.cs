@@ -30,6 +30,17 @@ namespace Tests
                 if(eventHandlers != null)
                     Debug.Log("State " + state + " contains " + eventHandlers.Length + " event handlers");
             }
+
+            var transitions = stateMachine.GetTransitions();
+
+            foreach (var transition in transitions)
+            {
+                Debug.Log("Transition: " + transition.StateFrom + " -> " + transition.Trigger + " -> " + transition.StateTo);
+
+                var guardConditions = stateMachine.GetGuardConditionsOf(transition);
+
+                Debug.Log("Guard conditions count: " + guardConditions.Length);
+            }
         }
     }
 

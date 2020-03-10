@@ -90,8 +90,12 @@ namespace Paps.PlainStateMachine_ToolsForUnity
 
             _stateIdTypeFullName = StateFrom.GetType().FullName;
             _triggerTypeFullName = Trigger.GetType().FullName;
-            
-            guardConditions.CopyTo(_guardConditions, 0);
+
+            if (guardConditions != null)
+            {
+                _guardConditions = new ScriptableGuardCondition[guardConditions.Length];
+                guardConditions.CopyTo(_guardConditions, 0);
+            }
         }
     }
 }
