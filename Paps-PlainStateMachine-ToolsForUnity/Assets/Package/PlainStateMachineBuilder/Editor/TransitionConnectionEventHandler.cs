@@ -26,7 +26,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                             nodeEvent.Use();
                         }
                         else
-                            _window.DeselectAllTransitions();
+                            _window.DeselectAll();
                     }
                     else if (IsRightMouseClick(nodeEvent.button) && _window.IsSelected(transition))
                     {

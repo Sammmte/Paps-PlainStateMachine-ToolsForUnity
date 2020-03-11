@@ -4,7 +4,7 @@ using System;
 
 namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
-    internal class TransitionConnection
+    internal class TransitionConnection : IInspectable
     {
         private const float Width = 8f, ClickableExtraRange = 8f;
 

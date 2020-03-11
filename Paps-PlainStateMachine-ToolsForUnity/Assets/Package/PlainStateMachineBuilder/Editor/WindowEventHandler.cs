@@ -7,8 +7,6 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
     {
         private PlainStateMachineBuilderEditorWindow _window;
 
-        private bool _wantsToDrag;
-
         public WindowEventHandler(PlainStateMachineBuilderEditorWindow window)
         {
             _window = window;
@@ -18,19 +16,6 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         {
             switch (windowEvent.type)
             {
-                case EventType.KeyDown:
-
-                    if (IsDragKey(windowEvent.keyCode))
-                        _wantsToDrag = true;
-
-                    break;
-
-                case EventType.KeyUp:
-
-                    if (IsDragKey(windowEvent.keyCode))
-                        _wantsToDrag = false;
-
-                    break;
 
                 case EventType.MouseDown:
 
@@ -44,7 +29,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                 
                 case EventType.MouseDrag:
 
-                    if (_wantsToDrag && IsLeftMouseClick(windowEvent.button))
+                    if (windowEvent.alt && IsLeftMouseClick(windowEvent.button))
                     {
                         _window.Drag(windowEvent.delta);
                         windowEvent.Use();
@@ -69,11 +54,6 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             GenericMenu genericMenu = new GenericMenu();
             genericMenu.AddItem(new GUIContent("Add node"), false, () => _window.AddNode(position));
             genericMenu.ShowAsContext();
-        }
-
-        private bool IsDragKey(KeyCode code)
-        {
-            return code == KeyCode.LeftAlt || code == KeyCode.LeftCommand;
         }
     }
 }

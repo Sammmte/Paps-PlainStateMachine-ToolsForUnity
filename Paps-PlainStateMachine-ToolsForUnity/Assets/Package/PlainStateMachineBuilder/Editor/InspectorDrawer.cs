@@ -37,7 +37,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             _controlsAreaStyle.padding = new RectOffset(20, 20, 20, 20);
         }
 
-        public void Draw(Rect windowRect, Action drawInspectorControls)
+        public void Draw(Rect windowRect, IInspectable inspectable)
         {
             var position = new Vector2(LeftPadding, TopPadding);
             var size = new Vector2(Width, Height);
@@ -46,7 +46,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
             GUILayout.BeginArea(boxRect, _boxStyle);
             DrawTitle();
-            drawInspectorControls();
+            inspectable?.DrawControls();
             GUILayout.EndArea();
         }
 

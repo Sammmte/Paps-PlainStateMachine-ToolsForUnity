@@ -34,7 +34,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                         else
                         {
                             _window.EndTransitionPreview();
-                            _window.DeselectAllNodes();
+                            _window.DeselectAll();
                         }
                             
                     }

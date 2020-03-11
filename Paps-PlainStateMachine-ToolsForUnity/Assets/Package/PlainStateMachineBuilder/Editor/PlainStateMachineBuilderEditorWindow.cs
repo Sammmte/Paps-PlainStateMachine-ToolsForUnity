@@ -24,10 +24,9 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         private PlainStateMachineBuilder _builder;
         private InspectorDrawer _inspectorDrawer;
 
-        private StateNode _selectedNode;
-        private StateNode _initialNode;
+        private IInspectable _selectedObject;
 
-        private TransitionConnection _selectedTransition;
+        private StateNode _initialNode;
 
         private TransitionConnectionPreview _transitionPreview;
 
@@ -145,12 +144,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             DrawTransitionPreview();
             DrawNodes();
             DrawBuilderSettings();
-
-            if (HasSelectedNode())
-                DrawInspector(_selectedNode.DrawControls);
-
-            if (HasSelectedTransition())
-                DrawInspector(_selectedTransition.DrawControls);
+            DrawInspector();
 
             ProcessNodeEvents(Event.current);
             ProcessTransitionEvents(Event.current);
@@ -168,9 +162,10 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             }
         }
 
-        private void DrawInspector(Action drawSelectedElementControls)
+        private void DrawInspector()
         {
-            _inspectorDrawer.Draw(position, drawSelectedElementControls);
+            if(HasSomethingSelected())
+                _inspectorDrawer.Draw(position, _selectedObject);
         }
 
         private void DrawBackground()
@@ -251,8 +246,8 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         {
             DoWithUndoAndDirtyFlag(() =>
             {
-                node.OnStateIdChanged += (changedNode, previousId, currentId) => Rebuild();
-                node.OnStateObjectChanged += (changedNode, previousStateObj, currentStateObj) => Rebuild();
+                node.OnStateIdChanged += (changedNode, previousId, currentId) => RecordAndRebuild();
+                node.OnStateObjectChanged += (changedNode, previousStateObj, currentStateObj) => RecordAndRebuild();
                 node.OnPositionChanged += UpdateNodePositionMetadata;
             
                 _nodes.Add(node);
@@ -271,12 +266,10 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             
                 var newTransition = new TransitionConnection(source, target, _builder.TriggerType);
 
-                newTransition.OnTriggerChanged += (connection, previousTrigger, currentTrigger) => Rebuild();
-                newTransition.OnGuardConditionsChanged += (connection, currentGuardConditions) => Rebuild();
+                newTransition.OnTriggerChanged += (connection, previousTrigger, currentTrigger) => RecordAndRebuild();
+                newTransition.OnGuardConditionsChanged += (connection, currentGuardConditions) => RecordAndRebuild();
 
                 _transitions.Add(newTransition);
-                
-                Rebuild();
             });
         }
 
@@ -287,8 +280,8 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             
             var newTransition = new TransitionConnection(source, target, _builder.TriggerType, transitionInfo.Trigger, transitionInfo.GuardConditions);
 
-            newTransition.OnTriggerChanged += (connection, previousTrigger, currentTrigger) => Rebuild();
-            newTransition.OnGuardConditionsChanged += (connection, currentGuardConditions) => Rebuild();
+            newTransition.OnTriggerChanged += (connection, previousTrigger, currentTrigger) => RecordAndRebuild();
+            newTransition.OnGuardConditionsChanged += (connection, currentGuardConditions) => RecordAndRebuild();
             
             _transitions.Add(newTransition);
         }
@@ -304,24 +297,34 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             return false;
         }
 
-        public void RemoveNode(StateNode node)
+        private void RecordAndRebuild()
         {
             DoWithUndoAndDirtyFlag(() =>
             {
-                _nodes.Remove(node);
-
                 Rebuild();
             });
         }
 
+        public void RemoveNode(StateNode node)
+        {
+            if (_nodes.Remove(node))
+            {
+                if(IsSelected(node))
+                    DeselectAll();
+                
+                RecordAndRebuild();
+            }
+        }
+
         public void RemoveTransition(TransitionConnection transition)
         {
-            DoWithUndoAndDirtyFlag(() =>
+            if (_transitions.Remove(transition))
             {
-                _transitions.Remove(transition);
+                if (IsSelected(transition))
+                    DeselectAll();
                 
-                Rebuild();
-            });
+                RecordAndRebuild();
+            }
         }
 
         private void UpdateNodePositionMetadata(StateNode node, Vector2 position)
@@ -427,12 +430,6 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             }
         }
 
-        public void DeselectAll()
-        {
-            DeselectAllNodes();
-            DeselectAllTransitions();
-        }
-
         public void SelectNode(StateNode node)
         {
             DeselectAll();
@@ -444,7 +441,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                 if (currentNode == node)
                 {
                     GUI.FocusControl(null);
-                    _selectedNode = currentNode;
+                    _selectedObject = currentNode;
                 }
 
             }
@@ -452,9 +449,9 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             Repaint();
         }
 
-        public void DeselectAllNodes()
+        public void DeselectAll()
         {
-            _selectedNode = null;
+            _selectedObject = null;
 
             Repaint();
         }
@@ -470,16 +467,9 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                 if (currentTransition == transition)
                 {
                     GUI.FocusControl(null);
-                    _selectedTransition = currentTransition;
+                    _selectedObject = currentTransition;
                 }
             }
-
-            Repaint();
-        }
-
-        public void DeselectAllTransitions()
-        {
-            _selectedTransition = null;
 
             Repaint();
         }
@@ -509,12 +499,12 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         public bool IsSelected(StateNode node)
         {
-            return _selectedNode == node;
+            return object.ReferenceEquals(_selectedObject, node);
         }
 
         public bool IsSelected(TransitionConnection transition)
         {
-            return _selectedTransition == transition;
+            return object.ReferenceEquals(_selectedObject, transition);
         }
 
         public bool IsInitial(StateNode node)
@@ -524,12 +514,17 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         public bool HasSelectedNode()
         {
-            return _selectedNode != null;
+            return _selectedObject != null && _selectedObject is StateNode;
         }
 
         public bool HasSelectedTransition()
         {
-            return _selectedTransition != null;
+            return _selectedObject != null && _selectedObject is TransitionConnection;
+        }
+
+        public bool HasSomethingSelected()
+        {
+            return _selectedObject != null;
         }
 
         public void BeginTransitionPreviewFrom(StateNode source)
@@ -561,21 +556,19 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             RebuildStates();
             RebuildTransitions();
             RebuildMetadata();
-            
-            if(_selectedNode != null && _builder.ContainsState(_selectedNode.StateId) == false)
-                DeselectAllNodes();
-            if (_selectedTransition != null &&
-                _builder.ContainsTransition(
-                    _selectedTransition.StateFrom, _selectedTransition.Trigger, _selectedTransition.StateTo)) ;
+            RebuildInitialState();
+        }
 
+        private void RebuildInitialState()
+        {
             var initialState = _builder.GetInitialStateId();
-            
-            if(initialState != null)
+
+            if (initialState != null)
                 SetInitialStateNode(StateNodeOf(_builder.GetInitialStateId()));
-            else if(_nodes.Count > 0)
+            else if (_nodes.Count > 0)
                 SetInitialStateNode(_nodes[0]);
         }
-        
+
         private void ClearBuilder()
         {
             _builder.RemoveAllTransitions();

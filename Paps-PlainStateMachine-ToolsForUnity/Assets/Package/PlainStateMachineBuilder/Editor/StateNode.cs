@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
-    internal class StateNode
+    internal class StateNode : IInspectable
     {
         private const float Width = 200;
         private const float Height = 150;
