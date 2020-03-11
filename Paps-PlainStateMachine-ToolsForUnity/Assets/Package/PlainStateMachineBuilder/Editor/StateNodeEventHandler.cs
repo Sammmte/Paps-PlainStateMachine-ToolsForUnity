@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 
 namespace Paps.PlainStateMachine_ToolsForUnity.Editor
@@ -34,7 +32,11 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                             nodeEvent.Use();
                         }
                         else
+                        {
+                            _window.EndTransitionPreview();
                             _window.DeselectAllNodes();
+                        }
+                            
                     }
                     else if (IsRightMouseClick(nodeEvent.button) && _window.IsSelected(node))
                     {

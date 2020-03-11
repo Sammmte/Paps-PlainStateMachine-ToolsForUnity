@@ -10,6 +10,8 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private const int ControlPaddingLeft = 20, ControlPaddingRight = 20, ControlPaddingTop = 20, ControlPaddingBottom = 20;
 
+        private static readonly Color SelectedColor = new Color(44f / 255f, 130f / 255f, 201f / 255f);
+
         private readonly StateNode _source;
         private readonly StateNode _target;
         
@@ -53,7 +55,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         public void Draw(bool asSelected)
         {
             var previousColor = Handles.color;
-            Handles.color = Color.yellow;
+            Handles.color = asSelected ? SelectedColor : Color.yellow;
             Handles.DrawAAPolyLine(Width,StartPoint, EndPoint);
             Handles.color = previousColor;
         }
