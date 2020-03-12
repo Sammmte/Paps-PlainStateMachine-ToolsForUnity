@@ -16,13 +16,17 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         {
             switch (windowEvent.type)
             {
-
                 case EventType.MouseDown:
 
                     if (IsRightMouseClick(windowEvent.button))
                     {
                         DisplayGeneralOptionsMenu(windowEvent.mousePosition);
                         windowEvent.Use();
+                    }
+                    else if (IsLeftMouseClick(windowEvent.button))
+                    {
+                        _window.EndTransitionPreview();
+                        _window.DeselectAll();
                     }
 
                     break;

@@ -1,6 +1,9 @@
 ﻿using UnityEditor;
 using UnityEngine;
 using System;
+using System.Numerics;
+using Vector2 = UnityEngine.Vector2;
+using Vector3 = UnityEngine.Vector3;
 
 namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
@@ -56,8 +59,48 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         {
             var previousColor = Handles.color;
             Handles.color = asSelected ? SelectedColor : Color.yellow;
-            Handles.DrawAAPolyLine(Width,StartPoint, EndPoint);
+
+            if (IsReentrant())
+            {
+                var points = GetReentrantLinePoints();
+                Handles.DrawAAPolyLine(Width, points);
+                DrawTriangleAtPoint(Vector2.Lerp(points[2], points[3], 0.5f));
+            }
+            else
+            {
+                Handles.DrawAAPolyLine(Width,StartPoint, EndPoint);
+                DrawTriangleAtPoint(Vector2.Lerp(StartPoint, EndPoint, 0.5f));
+            }
+                
+            
             Handles.color = previousColor;
+        }
+
+        private Vector3[] GetReentrantLinePoints()
+        {
+            int offset = 130;
+
+            return new Vector3[]
+            {
+                StartPoint,
+                new Vector2(StartPoint.x - offset, StartPoint.y),
+                new Vector2(StartPoint.x - offset, StartPoint.y - offset),
+                new Vector2(StartPoint.x, StartPoint.y - offset),
+                StartPoint
+            };
+        }
+
+        private void DrawTriangleAtPoint(Vector2 center)
+        {
+            int offset = 5;
+            
+            Handles.DrawAAPolyLine(Width, new Vector3[]
+            {
+                new Vector2(center.x - offset, center.y - offset),
+                new Vector2(center.x + offset, center.y),
+                new Vector2(center.x - offset, center.y + offset),
+                new Vector2(center.x - offset, center.y - offset), 
+            });
         }
 
         public void DrawControls()
@@ -129,6 +172,11 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             }
 
             return newArray;
+        }
+
+        private bool IsReentrant()
+        {
+            return Source == Target;
         }
     }
 }
