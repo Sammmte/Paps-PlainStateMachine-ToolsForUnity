@@ -9,7 +9,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
     internal class TransitionConnection : IInspectable
     {
-        private const float Width = 8f, ClickableExtraRange = 8f;
+        private const float Width = 4f, ClickableExtraRange = 8f, ArrowWidthExtent = 8, ArrowHeightExtent = 8, ArrowLineWidth = 3;
 
         private const int ControlPaddingLeft = 20, ControlPaddingRight = 20, ControlPaddingTop = 20, ControlPaddingBottom = 20;
 
@@ -58,18 +58,18 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         public void Draw(bool asSelected)
         {
             var previousColor = Handles.color;
-            Handles.color = asSelected ? SelectedColor : Color.yellow;
+            Handles.color = asSelected ? SelectedColor : Color.white;
 
             if (IsReentrant())
             {
                 var points = GetReentrantLinePoints();
                 Handles.DrawAAPolyLine(Width, points);
-                DrawTriangleAtPoint(Vector2.Lerp(points[2], points[3], 0.5f));
+                DrawArrow(Vector2.Lerp(points[2], points[3], 0.5f));
             }
             else
             {
                 Handles.DrawAAPolyLine(Width,StartPoint, EndPoint);
-                DrawTriangleAtPoint(Vector2.Lerp(StartPoint, EndPoint, 0.5f));
+                DrawArrow(Vector2.Lerp(StartPoint, EndPoint, 0.5f));
             }
                 
             
@@ -90,17 +90,23 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             };
         }
 
-        private void DrawTriangleAtPoint(Vector2 center)
+        private void DrawArrow(Vector2 center)
         {
-            int offset = 5;
+            var direction = EndPoint - StartPoint;
+            Vector2 normalizedDirection = direction.normalized;
             
-            Handles.DrawAAPolyLine(Width, new Vector3[]
-            {
-                new Vector2(center.x - offset, center.y - offset),
-                new Vector2(center.x + offset, center.y),
-                new Vector2(center.x - offset, center.y + offset),
-                new Vector2(center.x - offset, center.y - offset), 
-            });
+            var perpendicular = Vector2.Perpendicular(direction) * -1;
+
+            var inferiorLeftPoint =
+                center + (perpendicular.normalized * ArrowWidthExtent) - (normalizedDirection * ArrowHeightExtent);
+
+            var inferiorRightPoint =
+                center - (perpendicular.normalized * ArrowWidthExtent) - (normalizedDirection * ArrowHeightExtent);
+
+            var superiorPoint =
+                center + (normalizedDirection * ArrowHeightExtent);
+
+            Handles.DrawAAConvexPolygon( superiorPoint, inferiorLeftPoint, inferiorRightPoint, superiorPoint);
         }
 
         public void DrawControls()

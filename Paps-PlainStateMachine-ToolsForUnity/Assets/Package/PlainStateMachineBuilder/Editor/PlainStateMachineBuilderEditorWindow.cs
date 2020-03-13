@@ -29,6 +29,9 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         private StateNode _initialNode;
 
         private TransitionConnectionPreview _transitionPreview;
+        
+        private static readonly Color color = new Color(95f / 255f, 95f / 255f, 95f / 255f);
+        private static readonly Texture2D backgroundTexture = CreateBackgroundTexture(color);
 
         public static void OpenWindow(PlainStateMachineBuilder builder)
         {
@@ -60,6 +63,17 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             _builderSettingsDrawer.OnTriggerTypeChanged += OnTriggerTypeChanged;
 
             Undo.undoRedoPerformed += Reload;
+            
+            
+        }
+        
+        private static Texture2D CreateBackgroundTexture(Color color)
+        {
+            var texture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+            texture.SetPixel(0, 0, color);
+            texture.Apply();
+
+            return texture;
         }
 
         private void LoadBuilder()
@@ -170,6 +184,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private void DrawBackground()
         {
+            GUI.DrawTexture(new Rect(0, 0, maxSize.x, maxSize.y), backgroundTexture);
             _gridDrawer.Draw(position);
         }
 

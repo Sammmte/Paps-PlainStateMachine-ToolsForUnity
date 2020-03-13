@@ -10,8 +10,8 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         public void Draw(Rect position)
         {
-            DrawGrid(20, 0.2f, Color.gray, ref position);
-            DrawGrid(100, 0.4f, Color.gray, ref position);
+            DrawGrid(20, 0.2f, Color.white, ref position);
+            DrawGrid(100, 0.4f, Color.white, ref position);
         }
 
         private void DrawGrid(float gridSpacing, float gridOpacity, Color gridColor, ref Rect position)
