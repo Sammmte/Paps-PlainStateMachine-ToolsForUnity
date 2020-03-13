@@ -30,5 +30,5 @@ MonoBehaviour:
   _triggerTypeFullName: System.Int32
   _metadata:
   - Key: PLAIN_STATE_MACHINE_BUILDER_METADATA
-    Value: '{"StateNodesMetadata":[{"_position":{"x":801.0,"y":573.0},"_serializedStateId":"5","_stateIdTypeFullName":"System.Int32"},{"_position":{"x":380.0,"y":390.0},"_serializedStateId":"6","_stateIdTypeFullName":"System.Int32"}]}'
+    Value: '{"StateNodesMetadata":[{"_position":{"x":425.0,"y":369.0},"_serializedStateId":"5","_stateIdTypeFullName":"System.Int32"},{"_position":{"x":369.0,"y":70.0},"_serializedStateId":"6","_stateIdTypeFullName":"System.Int32"}]}'
   _serializedInitialStateId: 5

@@ -42,6 +42,9 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private void Initialize(PlainStateMachineBuilder builder)
         {
+            if(builder == null)
+                return;
+
             _builder = builder;
 
             titleContent = new GUIContent("Plain State Machine Builder Window");
@@ -155,8 +158,8 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         {
             DrawBackground();
             DrawTransitions();
-            DrawTransitionPreview();
             DrawNodes();
+            DrawTransitionPreview();
             DrawBuilderSettings();
             DrawInspector();
 

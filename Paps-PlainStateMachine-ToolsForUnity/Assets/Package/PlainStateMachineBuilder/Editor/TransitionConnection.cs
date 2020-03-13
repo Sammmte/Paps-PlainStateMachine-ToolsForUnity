@@ -22,8 +22,8 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         private GUIStyle _controlsAreaStyle;
         private PlainStateMachineGenericTypeDrawer _triggerDrawer;
 
-        public Vector3 StartPoint => _source.Center;
-        public Vector3 EndPoint => _target.Center;
+        public Vector2 StartPoint => GetStartPoint();
+        public Vector2 EndPoint => GetEndPoint();
         public object Trigger => _triggerDrawer.Value;
         public ScriptableGuardCondition[] GuardConditions { get; private set; }
         public Action<TransitionConnection, object, object> OnTriggerChanged;
@@ -64,7 +64,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             {
                 var points = GetReentrantLinePoints();
                 Handles.DrawAAPolyLine(Width, points);
-                DrawArrow(Vector2.Lerp(points[2], points[3], 0.5f), EndPoint - StartPoint);
+                DrawArrow(Vector2.Lerp(points[2], points[3], 0.5f), points[3] - points[2]);
             }
             else
             {
@@ -111,6 +111,10 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         public void DrawControls()
         {
             EditorGUILayout.BeginVertical(_controlsAreaStyle);
+            
+            DrawTransitionParts();
+            
+            GUILayout.Space(10);
 
             var previousTrigger = Trigger;
             DrawTriggerField();
@@ -121,6 +125,12 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             if (previousGuardConditions != GuardConditions) OnGuardConditionsChanged?.Invoke(this, GuardConditions);
 
             EditorGUILayout.EndVertical();
+        }
+
+        private void DrawTransitionParts()
+        {
+            if(Trigger != null)
+                GUILayout.Label(Source.StateId + " -> " + Trigger + " -> " + Target.StateId);
         }
 
         private void DrawTriggerField()
@@ -182,6 +192,26 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         private bool IsReentrant()
         {
             return Source == Target;
+        }
+
+        private Vector2 GetStartPoint()
+        {
+            Vector2 direction = Target.Center - Source.Center;
+            Vector2 normalizedDirection = direction.normalized;
+
+            Vector2 perpendicular = Vector2.Perpendicular(normalizedDirection);
+
+            return Source.Center + (perpendicular * 7);
+        }
+
+        private Vector2 GetEndPoint()
+        {
+            Vector2 direction = Target.Center - Source.Center;
+            Vector2 normalizedDirection = direction.normalized;
+
+            Vector2 perpendicular = Vector2.Perpendicular(normalizedDirection);
+
+            return Target.Center + (perpendicular * 7);
         }
     }
 }
