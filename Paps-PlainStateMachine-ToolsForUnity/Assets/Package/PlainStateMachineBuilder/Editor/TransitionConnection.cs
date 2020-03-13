@@ -9,7 +9,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
     internal class TransitionConnection : IInspectable
     {
-        private const float Width = 4f, ClickableExtraRange = 8f, ArrowWidthExtent = 8, ArrowHeightExtent = 8, ArrowLineWidth = 3;
+        private const float Width = 4f, ClickableExtraRange = 8f, ArrowWidthExtent = 8, ArrowHeightExtent = 8;
 
         private const int ControlPaddingLeft = 20, ControlPaddingRight = 20, ControlPaddingTop = 20, ControlPaddingBottom = 20;
 
@@ -64,12 +64,12 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             {
                 var points = GetReentrantLinePoints();
                 Handles.DrawAAPolyLine(Width, points);
-                DrawArrow(Vector2.Lerp(points[2], points[3], 0.5f));
+                DrawArrow(Vector2.Lerp(points[2], points[3], 0.5f), EndPoint - StartPoint);
             }
             else
             {
                 Handles.DrawAAPolyLine(Width,StartPoint, EndPoint);
-                DrawArrow(Vector2.Lerp(StartPoint, EndPoint, 0.5f));
+                DrawArrow(Vector2.Lerp(StartPoint, EndPoint, 0.5f), EndPoint - StartPoint);
             }
                 
             
@@ -90,9 +90,8 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             };
         }
 
-        private void DrawArrow(Vector2 center)
+        private void DrawArrow(Vector2 center, Vector2 direction)
         {
-            var direction = EndPoint - StartPoint;
             Vector2 normalizedDirection = direction.normalized;
             
             var perpendicular = Vector2.Perpendicular(direction) * -1;

@@ -21,15 +21,14 @@ MonoBehaviour:
     _stateIdTypeFullName: System.Int32
   _transitions:
   - _serializedStateFrom: 5
-    _serializedTrigger: 3
+    _serializedTrigger: 4
     _serializedStateTo: 6
     _stateIdTypeFullName: System.Int32
     _triggerTypeFullName: System.Int32
-    _guardConditions:
-    - {fileID: 11400000, guid: 8fcafc5c77dcb4473a95e6a39f119df0, type: 2}
+    _guardConditions: []
   _stateIdTypeFullName: System.Int32
   _triggerTypeFullName: System.Int32
   _metadata:
   - Key: PLAIN_STATE_MACHINE_BUILDER_METADATA
-    Value: '{"StateNodesMetadata":[{"_position":{"x":345.0,"y":308.0},"_serializedStateId":"5","_stateIdTypeFullName":"System.Int32"},{"_position":{"x":626.0,"y":162.0},"_serializedStateId":"6","_stateIdTypeFullName":"System.Int32"}]}'
+    Value: '{"StateNodesMetadata":[{"_position":{"x":801.0,"y":573.0},"_serializedStateId":"5","_stateIdTypeFullName":"System.Int32"},{"_position":{"x":380.0,"y":390.0},"_serializedStateId":"6","_stateIdTypeFullName":"System.Int32"}]}'
   _serializedInitialStateId: 5
