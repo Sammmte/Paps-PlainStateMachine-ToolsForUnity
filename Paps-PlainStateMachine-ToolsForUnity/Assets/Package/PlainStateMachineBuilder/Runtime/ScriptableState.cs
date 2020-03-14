@@ -9,14 +9,6 @@ namespace Paps.PlainStateMachine_ToolsForUnity
         private string _debugName;
 
         public string DebugName => _debugName;
-
-        protected object stateMachine { get; private set; }
-
-        public void Initialize(object stateMachine)
-        {
-            if (this.stateMachine == null)
-                this.stateMachine = stateMachine;
-        }
         
         public void Enter()
         {

@@ -1,8 +1,6 @@
 ﻿using Paps.PlainStateMachine_ToolsForUnity;
 using Paps.StateMachines;
 using UnityEngine;
-using SomeNamespace;
-using System;
 
 namespace Tests
 {
@@ -13,7 +11,7 @@ namespace Tests
 
         public void Start()
         {
-            var stateMachine = (PlainStateMachine<int, int>)_stateMachineBuilder.Build();
+            var stateMachine = (PlainStateMachine<string, string>)_stateMachineBuilder.Build();
 
             var states = stateMachine.GetStates();
 
@@ -39,7 +37,10 @@ namespace Tests
 
                 var guardConditions = stateMachine.GetGuardConditionsOf(transition);
 
-                Debug.Log("Guard conditions count: " + guardConditions.Length);
+                if(guardConditions != null)
+                    Debug.Log("Guard conditions count: " + guardConditions.Length);
+                else
+                    Debug.Log("Guard conditions count: " + 0);
             }
         }
     }

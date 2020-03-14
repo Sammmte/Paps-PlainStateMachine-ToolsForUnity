@@ -50,25 +50,25 @@ namespace Paps.PlainStateMachine_ToolsForUnity
         }
         
         [SerializeField]
-        //[HideInInspector]
+        [HideInInspector]
         private List<StateInfo> _states;
 
         [SerializeField] 
         private List<TransitionInfo> _transitions;
 
         [SerializeField]
-        //[HideInInspector]
+        [HideInInspector]
         private string _stateIdTypeFullName, _triggerTypeFullName;
 
         [SerializeField]
-        //[HideInInspector]
+        [HideInInspector]
         private List<Metadata> _metadata;
 
         private Type _stateIdType;
         private Type _triggerType;
 
         [SerializeField]
-        //[HideInInspector]
+        [HideInInspector]
         private string _serializedInitialStateId;
 
         private object InitialStateId
