@@ -39,6 +39,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             GUI.color = Color.gray;
             GUILayout.BeginArea(boxRect, GUI.skin.window);
             GUI.color = previousColor;
+
             DrawTitle();
             inspectable?.DrawControls();
             GUILayout.EndArea();

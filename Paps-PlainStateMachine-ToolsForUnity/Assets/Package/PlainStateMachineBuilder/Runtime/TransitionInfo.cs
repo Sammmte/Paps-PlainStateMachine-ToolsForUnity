@@ -24,11 +24,9 @@ namespace Paps.PlainStateMachine_ToolsForUnity
                 if (_triggerType == null)
                     _triggerType = PlainStateMachineBuilderHelper.GetTypeOf(_triggerTypeFullName);
 
-                return _stateIdType;
+                return _triggerType;
             }
         }
-
-        
 
         public object StateFrom
         {
