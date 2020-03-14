@@ -16,20 +16,10 @@ MonoBehaviour:
   - _serializedStateId: hola
     _stateObject: {fileID: 0}
     _stateIdTypeFullName: System.String
-  - _serializedStateId: chau
-    _stateObject: {fileID: 0}
-    _stateIdTypeFullName: System.String
-  _transitions:
-  - _serializedStateFrom: hola
-    _serializedTrigger: xoxo
-    _serializedStateTo: chau
-    _stateIdTypeFullName: System.String
-    _triggerTypeFullName: System.String
-    _guardConditions:
-    - {fileID: 11400000, guid: 8fcafc5c77dcb4473a95e6a39f119df0, type: 2}
+  _transitions: []
   _stateIdTypeFullName: System.String
   _triggerTypeFullName: System.String
   _metadata:
   - Key: PLAIN_STATE_MACHINE_BUILDER_METADATA
-    Value: '{"StateNodesMetadata":[{"_position":{"x":442.0,"y":87.0},"_serializedStateId":"hola","_stateIdTypeFullName":"System.String"},{"_position":{"x":574.0,"y":378.0},"_serializedStateId":"chau","_stateIdTypeFullName":"System.String"}]}'
+    Value: '{"StateNodesMetadata":[{"_position":{"x":442.0,"y":87.0},"_serializedStateId":"hola","_stateIdTypeFullName":"System.String"}]}'
   _serializedInitialStateId: hola
