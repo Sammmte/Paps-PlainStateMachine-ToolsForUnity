@@ -356,10 +356,24 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         {
             if (_nodes.Remove(node))
             {
+                RemoveTransitionsRelatedTo(node);
+
                 if(IsSelected(node))
                     DeselectAll();
                 
                 RecordAndRebuild();
+            }
+        }
+
+        private void RemoveTransitionsRelatedTo(StateNode node)
+        {
+            for (int i = 0; i < _transitions.Count; i++)
+            {
+                if (PlainStateMachineBuilderHelper.AreEquals(node.StateId, _transitions[i].StateFrom) ||
+                    PlainStateMachineBuilderHelper.AreEquals(node.StateId, _transitions[i].StateTo))
+                {
+                    RemoveTransition(_transitions[i]);
+                }
             }
         }
 
