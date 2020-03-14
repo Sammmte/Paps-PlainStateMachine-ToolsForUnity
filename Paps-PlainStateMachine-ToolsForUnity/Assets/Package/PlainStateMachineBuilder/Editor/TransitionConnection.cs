@@ -20,6 +20,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         
         private bool _guardConditionsArrayOpened;
         private GUIStyle _controlsAreaStyle;
+        private GUIStyle _simpleLabelStyle;
         private PlainStateMachineGenericTypeDrawer _triggerDrawer;
 
         public Vector2 StartPoint => GetStartPoint();
@@ -45,6 +46,9 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
             _controlsAreaStyle = new GUIStyle();
             _controlsAreaStyle.padding = new RectOffset(ControlPaddingLeft, ControlPaddingRight, ControlPaddingTop, ControlPaddingBottom);
+
+            _simpleLabelStyle = new GUIStyle();
+            _simpleLabelStyle.wordWrap = true;
         }
 
         public void SetNewTriggerType(Type triggerType)
@@ -129,8 +133,8 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private void DrawTransitionParts()
         {
-            if(Trigger != null)
-                GUILayout.Label(Source.StateId + " -> " + Trigger + " -> " + Target.StateId);
+            if(Source.StateId != null && Trigger != null && Target.StateId != null)
+                GUILayout.Label("From State: " + Source.StateId + " -> When Triggered: " + Trigger + " -> To State: " + Target.StateId, _simpleLabelStyle);
         }
 
         private void DrawTriggerField()

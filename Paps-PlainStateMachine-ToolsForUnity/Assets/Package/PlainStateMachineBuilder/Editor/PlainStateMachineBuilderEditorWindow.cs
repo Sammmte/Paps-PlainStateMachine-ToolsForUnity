@@ -30,8 +30,8 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private TransitionConnectionPreview _transitionPreview;
         
-        private static readonly Color color = new Color(95f / 255f, 95f / 255f, 95f / 255f);
-        private static readonly Texture2D backgroundTexture = CreateBackgroundTexture(color);
+        private static readonly Color backgroundColor = new Color(95f / 255f, 95f / 255f, 95f / 255f);
+        private Texture2D backgroundTexture;
 
         public static void OpenWindow(PlainStateMachineBuilder builder)
         {
@@ -46,6 +46,8 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                 return;
 
             _builder = builder;
+
+            backgroundTexture = CreateBackgroundTexture(backgroundColor);
 
             titleContent = new GUIContent("Plain State Machine Builder Window");
 
@@ -66,8 +68,6 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             _builderSettingsDrawer.OnTriggerTypeChanged += OnTriggerTypeChanged;
 
             Undo.undoRedoPerformed += Reload;
-            
-            
         }
         
         private static Texture2D CreateBackgroundTexture(Color color)
@@ -156,6 +156,9 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private void OnGUI()
         {
+            if (_builder == null)
+                return;
+
             DrawBackground();
             DrawTransitions();
             DrawNodes();
@@ -198,15 +201,17 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private void DrawNodes()
         {
+            BeginWindows();
             if (_nodes.Count > 0)
             {
                 for (int i = _nodes.Count - 1; i >= 0; i--)
                 {
                     var current = _nodes[i];
 
-                    current.Draw(IsSelected(current), IsInitial(current));
+                    current.Draw();
                 }
             }
+            EndWindows();
         }
 
         private void DrawTransitions()
@@ -250,14 +255,38 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private void AddNodeFrom(StateInfo stateInfo, StateNodeMetadata metadata)
         {
-            var newNode = new StateNode(metadata.Position, _builder.StateIdType, stateInfo.StateObject, stateInfo.StateId);
+            var newNode = new StateNode(metadata.Position, _builder.StateIdType, GenerateStateNodeId(), stateInfo.StateObject, stateInfo.StateId);
             InternalAddNode(newNode);
         }
 
         public void AddNode(Vector2 mousePosition, ScriptableState stateObject = null)
         {
-            var newNode = new StateNode(mousePosition, _builder.StateIdType, stateObject);
+            var newNode = new StateNode(mousePosition, _builder.StateIdType, GenerateStateNodeId(), stateObject);
             InternalAddNode(newNode);
+        }
+
+        private int GenerateStateNodeId()
+        {
+            int id;
+
+            do
+            {
+                id = Guid.NewGuid().GetHashCode();
+            }
+            while (ContainsStateNodeWithNodeId(id));
+
+            return id;
+        }
+
+        private bool ContainsStateNodeWithNodeId(int nodeId)
+        {
+            for (int i = 0; i < _nodes.Count; i++)
+            {
+                if (_nodes[i].NodeId == nodeId)
+                    return true;
+            }
+
+            return false;
         }
 
         private void InternalAddNode(StateNode node)
@@ -460,6 +489,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                 {
                     GUI.FocusControl(null);
                     _selectedObject = currentNode;
+                    currentNode.Select();
                 }
 
             }
@@ -469,6 +499,9 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         public void DeselectAll()
         {
+            if (_selectedObject is StateNode node)
+                node.Deselect();
+
             _selectedObject = null;
 
             Repaint();
@@ -494,7 +527,11 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         public void SetInitialStateNode(StateNode node)
         {
+            _nodes.ForEach(n => n.AsNormal());
+
             _initialNode = node;
+            _initialNode.AsInitial();
+
             _builder.SetInitialState(_initialNode.StateId);
         }
 

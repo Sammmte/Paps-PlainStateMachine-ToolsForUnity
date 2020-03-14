@@ -13,11 +13,6 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         private const float SelectedExtraPixels = 5;
         private static readonly float SelectedHalfExtraPixels = SelectedExtraPixels / 2;
 
-        private static readonly Texture2D _asNormal = CreateBackgroundTexture(Color.grey);
-        private static readonly Texture2D _asInitial = CreateBackgroundTexture(new Color(235f / 255f, 149f / 255f, 50f / 255f)); //orange
-
-        private static readonly Texture2D _selectedTexture = CreateBackgroundTexture(new Color(44f / 255f, 130f / 255f, 201f / 255f)); //blue
-
         public object StateId
         {
             get
@@ -36,24 +31,28 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
         public Action<StateNode, Vector2> OnPositionChanged;
 
         private Rect _nodeRect;
-        private GUIStyle _nodeStyle;
-        private GUIStyle _selectedNodeStyle;
         private GUIStyle _controlsAreaStyle;
         private GUIStyle _identityTitleStyle;
-        private GUIStyle _identityStateIdStyle;
 
         private PlainStateMachineGenericTypeDrawer _stateIdDrawer;
+
+        public int NodeId { get; private set; }
+
+        private static readonly Color NormalColor = Color.gray;
+        private static readonly Color InitialColor = new Color(235f / 255f, 149f / 255f, 50f / 255f);
+        private static readonly Color SelectedColor = new Color(135f / 255f, 206f / 255f, 250f / 255f);
+
+        private Color _currentColor;
+
+        private bool _isSelected;
 
         public Vector2 Position => _nodeRect.position;
         public Vector2 Center => _nodeRect.center;
 
-        public StateNode(Vector2 position, Type stateIdType, ScriptableState stateAsset = null, object stateId = null)
+        public StateNode(Vector2 position, Type stateIdType, int nodeId, ScriptableState stateAsset = null, object stateId = null)
         {
             _nodeRect = new Rect(position.x, position.y, Width, Height);
-            _nodeStyle = new GUIStyle();
-
-            _selectedNodeStyle = new GUIStyle();
-            _selectedNodeStyle.normal.background = _selectedTexture;
+            NodeId = nodeId;
 
             _controlsAreaStyle = new GUIStyle();
             _controlsAreaStyle.padding = new RectOffset(ControlPaddingLeft, ControlPaddingRight, ControlPaddingTop, ControlPaddingBottom);
@@ -64,22 +63,9 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             _identityTitleStyle.fontSize = 20;
             _identityTitleStyle.wordWrap = true;
 
-            _identityStateIdStyle = new GUIStyle();
-            _identityStateIdStyle.padding = new RectOffset(20, 20, 20, 20);
-            _identityStateIdStyle.alignment = TextAnchor.MiddleCenter;
-            _identityStateIdStyle.fontSize = 16;
-            _identityStateIdStyle.wordWrap = true;
-
             _stateIdDrawer = PlainStateMachineGenericTypeDrawerFactory.Create(stateIdType, stateId);
-        }
 
-        private static Texture2D CreateBackgroundTexture(Color color)
-        {
-            var texture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-            texture.SetPixel(0, 0, color);
-            texture.Apply();
-
-            return texture;
+            AsNormal();
         }
 
         public void SetNewStateIdType(Type stateIdType)
@@ -96,19 +82,15 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             OnPositionChanged?.Invoke(this, _nodeRect.position);
         }
 
-        public void Draw(bool asSelected, bool asInitial)
+        public void Draw()
         {
-            if(asSelected)
+            if(_isSelected)
                 DrawSelectedOutline();
 
-            if (asInitial)
-                AsInitial();
-            else
-                AsNormal();
-
-            GUILayout.BeginArea(_nodeRect, _nodeStyle);
-            DrawIdentity();
-            GUILayout.EndArea();
+            var previousColor = GUI.color;
+            GUI.color = _currentColor;
+            _nodeRect = GUI.Window(NodeId, _nodeRect, id => { DrawWindow(); }, StateId != null ? "State Id: " + StateId.ToString() : "No Id");
+            GUI.color = previousColor;
         }
 
         private void DrawSelectedOutline()
@@ -118,11 +100,14 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                 new Vector2(_nodeRect.size.x + SelectedExtraPixels, _nodeRect.size.y + SelectedExtraPixels)
                 );
 
-            GUILayout.BeginArea(selectedNodeRect, _selectedNodeStyle);
+            var previousColor = GUI.color;
+            GUI.color = SelectedColor;
+            GUILayout.BeginArea(selectedNodeRect, GUI.skin.window);
             GUILayout.EndArea();
+            GUI.color = previousColor;
         }
 
-        private void DrawIdentity()
+        private void DrawWindow()
         {
             if (StateObject != null)
             {
@@ -133,11 +118,6 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             }
             else
                 GUILayout.Label("Empty State", _identityTitleStyle);
-
-            GUILayout.Space(20);
-
-            if (StateId != null)
-                GUILayout.Label("State Id: " + StateId.ToString(), _identityStateIdStyle);
         }
 
         public void DrawControls()
@@ -167,14 +147,24 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             _stateIdDrawer.Draw("State Id");
         }
 
+        public void Select()
+        {
+            _isSelected = true;
+        }
+
+        public void Deselect()
+        {
+            _isSelected = false;
+        }
+
         public void AsNormal()
         {
-            _nodeStyle.normal.background = _asNormal;
+            _currentColor = NormalColor;
         }
 
         public void AsInitial()
         {
-            _nodeStyle.normal.background = _asInitial;
+            _currentColor = InitialColor;
         }
 
         public Rect GetRect()

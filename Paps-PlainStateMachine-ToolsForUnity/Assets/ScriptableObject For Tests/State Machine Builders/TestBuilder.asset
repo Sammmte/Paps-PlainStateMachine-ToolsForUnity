@@ -13,22 +13,28 @@ MonoBehaviour:
   m_Name: TestBuilder
   m_EditorClassIdentifier: 
   _states:
-  - _serializedStateId: 5
+  - _serializedStateId: Estado Re Loco
     _stateObject: {fileID: 0}
-    _stateIdTypeFullName: System.Int32
-  - _serializedStateId: 6
+    _stateIdTypeFullName: System.String
+  - _serializedStateId: Estado Re Logi
     _stateObject: {fileID: 0}
-    _stateIdTypeFullName: System.Int32
+    _stateIdTypeFullName: System.String
+  - _serializedStateId: No Entiendo Nah
+    _stateObject: {fileID: 0}
+    _stateIdTypeFullName: System.String
   _transitions:
-  - _serializedStateFrom: 5
+  - _serializedStateFrom: Estado Re Loco
     _serializedTrigger: 4
-    _serializedStateTo: 6
-    _stateIdTypeFullName: System.Int32
+    _serializedStateTo: Estado Re Logi
+    _stateIdTypeFullName: System.String
     _triggerTypeFullName: System.Int32
     _guardConditions: []
-  _stateIdTypeFullName: System.Int32
+  _stateIdTypeFullName: System.String
   _triggerTypeFullName: System.Int32
   _metadata:
   - Key: PLAIN_STATE_MACHINE_BUILDER_METADATA
-    Value: '{"StateNodesMetadata":[{"_position":{"x":425.0,"y":369.0},"_serializedStateId":"5","_stateIdTypeFullName":"System.Int32"},{"_position":{"x":369.0,"y":70.0},"_serializedStateId":"6","_stateIdTypeFullName":"System.Int32"}]}'
-  _serializedInitialStateId: 5
+    Value: '{"StateNodesMetadata":[{"_position":{"x":618.0,"y":114.0},"_serializedStateId":"Estado
+      Re Loco","_stateIdTypeFullName":"System.String"},{"_position":{"x":337.0,"y":425.0},"_serializedStateId":"Estado
+      Re Logi","_stateIdTypeFullName":"System.String"},{"_position":{"x":738.0,"y":533.0},"_serializedStateId":"No
+      Entiendo Nah","_stateIdTypeFullName":"System.String"}]}'
+  _serializedInitialStateId: Estado Re Loco
