@@ -144,7 +144,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         private void DrawGuardConditionsField()
         {
-            GuardConditions = ArrayField("Guard Conditions", ref _guardConditionsArrayOpened, GuardConditions);
+            GuardConditions = DrawGuardConditionArrayField("Guard Conditions", ref _guardConditionsArrayOpened, GuardConditions);
         }
 
         public bool IsPointOverConnection(Vector2 point)
@@ -152,7 +152,7 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
             return HandleUtility.DistancePointLine(point, StartPoint, EndPoint) <= ClickableExtraRange;
         }
 
-        public ScriptableGuardCondition[] ArrayField(string label, ref bool open, ScriptableGuardCondition[] array)
+        public ScriptableGuardCondition[] DrawGuardConditionArrayField(string label, ref bool open, ScriptableGuardCondition[] array)
         {
             if (array == null)
                 array = new ScriptableGuardCondition[0];
@@ -172,7 +172,9 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
                 for (var i = 0; i < newSize; i++)
                 {
+                    var previousValue = array[i];
                     array[i] = (ScriptableGuardCondition)EditorGUILayout.ObjectField("Value " + i, array[i], typeof(ScriptableGuardCondition), false);
+                    if (previousValue != array[i]) OnGuardConditionsChanged?.Invoke(this, GuardConditions);
                 }
             }
             return array;

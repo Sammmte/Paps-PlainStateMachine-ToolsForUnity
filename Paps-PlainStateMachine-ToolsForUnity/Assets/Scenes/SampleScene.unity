@@ -160,7 +160,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 01d394bf0d103b0489b8a9a89d0d13a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _stateMachineBuilder: {fileID: 11400000, guid: cc16400ed53f62e4eb8807f70a71caf3,
+  _stateMachineBuilder: {fileID: 11400000, guid: f02d2db9ee325494999d611458dd3c82,
     type: 2}
 --- !u!20 &519420031
 Camera:
