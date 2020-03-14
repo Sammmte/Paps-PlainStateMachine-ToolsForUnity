@@ -1,11 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using UnityEditor;
 using UnityEngine;
-using UnityEditor;
 
 namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 {
-    /*[CustomEditor(typeof(PlainStateMachineBuilder))]
+    [CustomEditor(typeof(PlainStateMachineBuilder))]
     public class PlainStateMachineBuilderEditor : UnityEditor.Editor
     {
         public override void OnInspectorGUI()
@@ -15,5 +13,5 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
                 PlainStateMachineBuilderEditorWindow.OpenWindow((PlainStateMachineBuilder)target);
             }
         }
-    }*/
+    }
 }

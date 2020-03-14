@@ -10,8 +10,6 @@ namespace Paps.PlainStateMachine_ToolsForUnity.Editor
 
         protected PlainStateMachineGenericTypeDrawer(object value)
         {
-            Debug.Log(value.GetType().FullName);
-
             if (value != null && IsValidType(value))
             {
                 Value = value;

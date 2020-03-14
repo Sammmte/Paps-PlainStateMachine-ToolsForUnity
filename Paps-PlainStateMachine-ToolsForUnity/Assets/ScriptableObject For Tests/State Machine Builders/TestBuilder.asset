@@ -24,17 +24,17 @@ MonoBehaviour:
     _stateIdTypeFullName: System.String
   _transitions:
   - _serializedStateFrom: Estado Re Loco
-    _serializedTrigger: 4
+    _serializedTrigger: Mi Trigger Re Loco
     _serializedStateTo: Estado Re Logi
     _stateIdTypeFullName: System.String
-    _triggerTypeFullName: System.Int32
+    _triggerTypeFullName: System.String
     _guardConditions: []
   _stateIdTypeFullName: System.String
-  _triggerTypeFullName: System.Int32
+  _triggerTypeFullName: System.String
   _metadata:
   - Key: PLAIN_STATE_MACHINE_BUILDER_METADATA
     Value: '{"StateNodesMetadata":[{"_position":{"x":618.0,"y":114.0},"_serializedStateId":"Estado
-      Re Loco","_stateIdTypeFullName":"System.String"},{"_position":{"x":337.0,"y":425.0},"_serializedStateId":"Estado
-      Re Logi","_stateIdTypeFullName":"System.String"},{"_position":{"x":738.0,"y":533.0},"_serializedStateId":"No
+      Re Loco","_stateIdTypeFullName":"System.String"},{"_position":{"x":368.0,"y":517.0},"_serializedStateId":"Estado
+      Re Logi","_stateIdTypeFullName":"System.String"},{"_position":{"x":713.0,"y":530.0},"_serializedStateId":"No
       Entiendo Nah","_stateIdTypeFullName":"System.String"}]}'
   _serializedInitialStateId: Estado Re Loco
